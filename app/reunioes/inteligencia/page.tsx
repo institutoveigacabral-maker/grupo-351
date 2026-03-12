@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { SharedHeader } from "@/components/reunioes/SharedHeader";
 import {
   Brain,
   Network,
@@ -18,9 +19,6 @@ import {
   ArrowRight,
   BarChart3,
   Shield,
-  Link2,
-  Copy,
-  Check,
   Search,
   X,
   Layers,
@@ -31,7 +29,6 @@ import {
   Repeat,
   User,
   Tag,
-  Map,
 } from "lucide-react";
 
 const ease = [0.16, 1, 0.3, 1] as const;
@@ -152,8 +149,6 @@ export default function InteligenciaPage() {
   const [expandedContext, setExpandedContext] = useState<number | null>(null);
   const [search, setSearch] = useState("");
   const [selectedCat, setSelectedCat] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
-
   useEffect(() => {
     if (!token) { setLoading(false); setError(true); return; }
     fetch(`/api/reunioes/analise?token=${encodeURIComponent(token)}`)
@@ -173,12 +168,6 @@ export default function InteligenciaPage() {
       return true;
     });
   }, [data, search, selectedCat]);
-
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(window.location.href);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
 
   if (error || (!loading && !token)) {
     return (
@@ -216,38 +205,7 @@ export default function InteligenciaPage() {
 
   return (
     <div className="min-h-screen bg-[#f5f5f7]">
-      {/* Header */}
-      <header className="sticky top-0 z-30 h-[56px] bg-white/70 backdrop-blur-xl border-b border-black/[0.04] flex items-center px-6 gap-4">
-        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-600 to-indigo-700 flex items-center justify-center">
-          <Brain className="w-[18px] h-[18px] text-white" />
-        </div>
-        <div>
-          <h2 className="text-[15px] font-semibold text-foreground font-display">Inteligencia de Reunioes</h2>
-          <p className="text-[10px] text-muted font-medium tracking-wide uppercase -mt-0.5">
-            {data.totalReunioes} reunioes analisadas · Atualizado {data.geradoEm}
-          </p>
-        </div>
-        <div className="flex-1" />
-        <a
-          href={`/reunioes?token=${token}`}
-          className="text-[12px] text-muted hover:text-foreground font-medium flex items-center gap-1.5 transition-colors"
-        >
-          <CalendarDays className="w-3.5 h-3.5" />
-          Ver reunioes
-        </a>
-        <a
-          href={`/reunioes/roadmaps?token=${token}`}
-          className="text-[12px] text-amber-600 hover:text-amber-800 font-medium flex items-center gap-1.5 bg-amber-500/5 hover:bg-amber-500/10 px-3 py-1.5 rounded-lg transition-all"
-        >
-          <Map className="w-3.5 h-3.5" />
-          Roadmaps
-        </a>
-        <div className="h-4 w-px bg-border" />
-        <button onClick={handleCopyLink} className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[12px] font-medium text-muted hover:text-foreground hover:bg-black/5 transition-all">
-          {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
-          {copied ? "Copiado" : "Copiar link"}
-        </button>
-      </header>
+      <SharedHeader active="inteligencia" subtitle={`${data.totalReunioes} reunioes analisadas`} />
 
       <main className="max-w-6xl mx-auto p-5 lg:p-8">
         <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-6">

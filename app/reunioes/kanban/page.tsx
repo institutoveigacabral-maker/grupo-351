@@ -3,17 +3,13 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { SharedHeader } from "@/components/reunioes/SharedHeader";
 import {
   Columns3,
   GripVertical,
-  CalendarDays,
   ListChecks,
   Users,
   Shield,
-  Copy,
-  Check,
-  Brain,
-  Map,
   X,
   Edit3,
   Save,
@@ -104,7 +100,6 @@ export default function KanbanPage() {
   const [editingCard, setEditingCard] = useState<string | null>(null);
   const [dragCard, setDragCard] = useState<string | null>(null);
   const [dragOverCol, setDragOverCol] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
   const [editForm, setEditForm] = useState<Partial<Card>>({});
   const [newCheckItem, setNewCheckItem] = useState("");
   const saveTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -218,12 +213,6 @@ export default function KanbanPage() {
     });
   };
 
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(window.location.href);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
   if (error || (!loading && !token)) {
     return (
       <div className="min-h-screen bg-[#f5f5f7] flex items-center justify-center p-6">
@@ -249,34 +238,8 @@ export default function KanbanPage() {
 
   return (
     <div className="min-h-screen bg-[#f5f5f7] flex flex-col">
-      {/* Header */}
-      <header className="sticky top-0 z-30 h-[56px] bg-white/70 backdrop-blur-xl border-b border-black/[0.04] flex items-center px-6 gap-4 shrink-0">
-        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
-          <Columns3 className="w-[18px] h-[18px] text-white" />
-        </div>
-        <div>
-          <h2 className="text-[15px] font-semibold text-foreground font-display">Kanban de Projetos</h2>
-          <p className="text-[10px] text-muted font-medium tracking-wide uppercase -mt-0.5">
-            {data.cards.length} projetos · Arraste para mover
-          </p>
-        </div>
-        <div className="flex-1" />
-        {saving && <span className="text-[11px] text-muted animate-pulse">Salvando...</span>}
-        <a href={`/reunioes?token=${token}`} className="text-[12px] text-muted hover:text-foreground font-medium flex items-center gap-1.5 transition-colors">
-          <CalendarDays className="w-3.5 h-3.5" /> Reunioes
-        </a>
-        <a href={`/reunioes/roadmaps?token=${token}`} className="text-[12px] text-amber-600 hover:text-amber-800 font-medium flex items-center gap-1.5 bg-amber-500/5 hover:bg-amber-500/10 px-3 py-1.5 rounded-lg transition-all">
-          <Map className="w-3.5 h-3.5" /> Roadmaps
-        </a>
-        <a href={`/reunioes/inteligencia?token=${token}`} className="text-[12px] text-violet-600 hover:text-violet-800 font-medium flex items-center gap-1.5 bg-violet-500/5 hover:bg-violet-500/10 px-3 py-1.5 rounded-lg transition-all">
-          <Brain className="w-3.5 h-3.5" /> Inteligencia
-        </a>
-        <div className="h-4 w-px bg-border" />
-        <button onClick={handleCopyLink} className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[12px] font-medium text-muted hover:text-foreground hover:bg-black/5 transition-all">
-          {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
-          {copied ? "Copiado" : "Link"}
-        </button>
-      </header>
+      <SharedHeader active="kanban" subtitle={`${data.cards.length} projetos`} />
+      {saving && <div className="bg-accent/5 text-center py-1 text-[11px] text-muted animate-pulse">Salvando...</div>}
 
       {/* Kanban Board */}
       <div className="flex-1 overflow-x-auto p-5 lg:p-6">

@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { SharedHeader } from "@/components/reunioes/SharedHeader";
 import {
   Map,
   ChevronDown,
@@ -11,9 +12,6 @@ import {
   Users,
   Target,
   Shield,
-  Copy,
-  Check,
-  Brain,
   Zap,
   Clock,
   ArrowRight,
@@ -142,7 +140,6 @@ export default function RoadmapsPage() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [filterPrioridade, setFilterPrioridade] = useState<string | null>(null);
   const [filterCategoria, setFilterCategoria] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
   const [activePhase, setActivePhase] = useState<Record<string, number>>({});
 
   useEffect(() => {
@@ -167,12 +164,6 @@ export default function RoadmapsPage() {
     const cats = new Set(data.roadmaps.map((r) => r.categoria));
     return Array.from(cats).sort();
   }, [data]);
-
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(window.location.href);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
 
   if (error || (!loading && !token)) {
     return (
@@ -201,30 +192,7 @@ export default function RoadmapsPage() {
 
   return (
     <div className="min-h-screen bg-[#f5f5f7]">
-      {/* Header */}
-      <header className="sticky top-0 z-30 h-[56px] bg-white/70 backdrop-blur-xl border-b border-black/[0.04] flex items-center px-6 gap-4">
-        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
-          <Map className="w-[18px] h-[18px] text-white" />
-        </div>
-        <div>
-          <h2 className="text-[15px] font-semibold text-foreground font-display">Roadmaps</h2>
-          <p className="text-[10px] text-muted font-medium tracking-wide uppercase -mt-0.5">
-            {data.totalRoadmaps} projetos mapeados · {data.totalReunioes} reunioes analisadas
-          </p>
-        </div>
-        <div className="flex-1" />
-        <a href={`/reunioes?token=${token}`} className="text-[12px] text-muted hover:text-foreground font-medium flex items-center gap-1.5 transition-colors">
-          <CalendarDays className="w-3.5 h-3.5" /> Reunioes
-        </a>
-        <a href={`/reunioes/inteligencia?token=${token}`} className="text-[12px] text-violet-600 hover:text-violet-800 font-medium flex items-center gap-1.5 transition-colors">
-          <Brain className="w-3.5 h-3.5" /> Inteligencia
-        </a>
-        <div className="h-4 w-px bg-border" />
-        <button onClick={handleCopyLink} className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[12px] font-medium text-muted hover:text-foreground hover:bg-black/5 transition-all">
-          {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
-          {copied ? "Copiado" : "Copiar link"}
-        </button>
-      </header>
+      <SharedHeader active="roadmaps" subtitle={`${data.totalRoadmaps} projetos mapeados`} />
 
       <main className="max-w-6xl mx-auto p-5 lg:p-8">
         <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-6">

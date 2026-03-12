@@ -1,649 +1,307 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
+import { SharedHeader } from "@/components/reunioes/SharedHeader";
+import { HealthRing } from "@/components/reunioes/HealthRing";
+import { stagger, fadeUp } from "@/lib/reunioes/animations";
+import { prioConfig, statusConfig, getTagColor, catIconColors } from "@/lib/reunioes/constants";
+import { formatDateShort, slugify, daysSince } from "@/lib/reunioes/utils";
 import {
-  CalendarDays,
-  Users,
-  Tag,
-  Search,
-  ChevronDown,
-  CheckCircle2,
-  Filter,
-  BarChart3,
-  X,
-  ListChecks,
-  MessageSquare,
-  Shield,
-  Link2,
-  Copy,
-  Check,
-  Brain,
-  Map,
-  Columns3,
+  Shield, AlertTriangle, Zap, TrendingUp, CalendarDays, ListChecks,
+  Users, Map, ChevronRight, ArrowRight, Target, Clock, Layers,
+  CheckCircle2, MessageSquare, User, Lightbulb, Flag,
 } from "lucide-react";
 
-interface Reuniao {
-  titulo: string;
-  data: string;
-  participantes?: string[];
-  tags?: string[];
-  resumo?: string;
-  acoes?: string[];
+interface Project {
+  id: string; nome: string; descricao: string; coluna: string; prioridade: string;
+  categoria: string; responsavel: string; dataUltima: string; totalReunioes: number;
+  totalAcoes: number; checkDone: number; checkTotal: number; health: number; notas: string;
 }
 
-const ease = [0.16, 1, 0.3, 1] as const;
-
-const stagger = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.04 } },
-};
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 12 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" as const } },
-};
-
-const tagColors: Record<string, string> = {
-  IPO: "bg-amber-500/10 text-amber-700",
-  IA: "bg-violet-500/10 text-violet-700",
-  China: "bg-red-500/10 text-red-700",
-  "Supply Chain": "bg-cyan-500/10 text-cyan-700",
-  Franquia: "bg-emerald-500/10 text-emerald-700",
-  Parceria: "bg-blue-500/10 text-blue-700",
-  Importacao: "bg-orange-500/10 text-orange-700",
-  "Grupo Rao": "bg-primary/10 text-primary",
-  Tecnologia: "bg-indigo-500/10 text-indigo-700",
-  WhatsApp: "bg-green-500/10 text-green-700",
-  Estrategia: "bg-sky-500/10 text-sky-700",
-  Marketing: "bg-pink-500/10 text-pink-700",
-  Financeiro: "bg-lime-500/10 text-lime-700",
-};
-
-function getTagColor(tag: string) {
-  for (const [key, value] of Object.entries(tagColors)) {
-    if (tag.toLowerCase().includes(key.toLowerCase())) return value;
-  }
-  return "bg-black/[0.04] text-foreground/70";
+interface HubData {
+  totalReunioes: number; totalProjetos: number; totalAcoes: number; totalPessoas: number;
+  projects: Project[];
+  alerts: { tipo: string; titulo: string; descricao: string; link: string; cor: string }[];
+  recentMeetings: { titulo: string; data: string; participantes?: string[]; acoes?: string[]; tags?: string[] }[];
+  activePeople: { nome: string; count: number }[];
+  emerging: { tema: string; recente: number; anterior: number }[];
+  nextActions: { acao: string; projeto: string; data: string }[];
+  colDist: Record<string, number>;
 }
 
-function formatMonth(dateStr: string) {
-  const d = new Date(dateStr + "T12:00:00");
-  return d.toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
-}
+const alertColors: Record<string, { bg: string; border: string; icon: string; dot: string }> = {
+  red: { bg: "bg-red-500/[0.04]", border: "border-red-500/15", icon: "text-red-500", dot: "bg-red-500" },
+  amber: { bg: "bg-amber-500/[0.04]", border: "border-amber-500/15", icon: "text-amber-500", dot: "bg-amber-500" },
+  violet: { bg: "bg-violet-500/[0.04]", border: "border-violet-500/15", icon: "text-violet-500", dot: "bg-violet-500" },
+};
 
-export default function ReunioesPublicPage() {
+export default function HubPage() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
-
-  const [reunioes, setReunioes] = useState<Reuniao[]>([]);
+  const [data, setData] = useState<HubData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [search, setSearch] = useState("");
-  const [selectedTag, setSelectedTag] = useState<string | null>(null);
-  const [selectedPerson, setSelectedPerson] = useState<string | null>(null);
-  const [expanded, setExpanded] = useState<Set<number>>(new Set());
-  const [view, setView] = useState<"timeline" | "stats">("timeline");
-  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    if (!token) {
-      setLoading(false);
-      setError(true);
-      return;
-    }
-    fetch(`/api/reunioes?token=${encodeURIComponent(token)}`)
-      .then((r) => {
-        if (!r.ok) throw new Error("Unauthorized");
-        return r.json();
-      })
-      .then((data) => {
-        setReunioes(data);
-        setLoading(false);
-      })
-      .catch(() => {
-        setLoading(false);
-        setError(true);
-      });
+    if (!token) { setLoading(false); setError(true); return; }
+    fetch(`/api/reunioes/hub?token=${encodeURIComponent(token)}`)
+      .then((r) => { if (!r.ok) throw new Error(); return r.json(); })
+      .then((d) => { setData(d); setLoading(false); })
+      .catch(() => { setLoading(false); setError(true); });
   }, [token]);
 
-  const stats = useMemo(() => {
-    const allTags: Record<string, number> = {};
-    const allPeople: Record<string, number> = {};
-    const byMonth: Record<string, number> = {};
-    let totalAcoes = 0;
-
-    reunioes.forEach((r) => {
-      r.tags?.forEach((t) => {
-        allTags[t] = (allTags[t] || 0) + 1;
-      });
-      r.participantes?.forEach((p) => {
-        const name = p.replace(/\s*\(.*?\)\s*/g, "").trim();
-        if (name) allPeople[name] = (allPeople[name] || 0) + 1;
-      });
-      const month = r.data.slice(0, 7);
-      byMonth[month] = (byMonth[month] || 0) + 1;
-      totalAcoes += r.acoes?.length || 0;
-    });
-
-    return {
-      total: reunioes.length,
-      totalAcoes,
-      tags: Object.entries(allTags)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 20),
-      people: Object.entries(allPeople)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 15),
-      byMonth: Object.entries(byMonth).sort((a, b) => b[0].localeCompare(a[0])),
-    };
-  }, [reunioes]);
-
-  const filtered = useMemo(() => {
-    return reunioes.filter((r) => {
-      if (search) {
-        const q = search.toLowerCase();
-        const match =
-          r.titulo.toLowerCase().includes(q) ||
-          r.resumo?.toLowerCase().includes(q) ||
-          r.tags?.some((t) => t.toLowerCase().includes(q)) ||
-          r.participantes?.some((p) => p.toLowerCase().includes(q));
-        if (!match) return false;
-      }
-      if (selectedTag && !r.tags?.some((t) => t.toLowerCase().includes(selectedTag.toLowerCase()))) {
-        return false;
-      }
-      if (selectedPerson && !r.participantes?.some((p) => p.toLowerCase().includes(selectedPerson.toLowerCase()))) {
-        return false;
-      }
-      return true;
-    });
-  }, [reunioes, search, selectedTag, selectedPerson]);
-
-  const grouped = useMemo(() => {
-    const groups: Record<string, Reuniao[]> = {};
-    filtered.forEach((r) => {
-      const month = r.data.slice(0, 7);
-      if (!groups[month]) groups[month] = [];
-      groups[month].push(r);
-    });
-    return Object.entries(groups).sort((a, b) => b[0].localeCompare(a[0]));
-  }, [filtered]);
-
-  const toggleExpand = (idx: number) => {
-    setExpanded((prev) => {
-      const next = new Set(prev);
-      if (next.has(idx)) next.delete(idx);
-      else next.add(idx);
-      return next;
-    });
-  };
-
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(window.location.href);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  // Error / no token
   if (error || (!loading && !token)) {
     return (
       <div className="min-h-screen bg-[#f5f5f7] flex items-center justify-center p-6">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.4, ease }}
-          className="bg-white rounded-3xl border border-black/[0.04] shadow-xl p-10 max-w-sm w-full text-center"
-        >
-          <div className="w-14 h-14 rounded-2xl bg-red-500/10 flex items-center justify-center mx-auto mb-5">
-            <Shield className="w-7 h-7 text-red-500" />
-          </div>
-          <h1 className="text-xl font-bold text-foreground font-display tracking-tight mb-2">
-            Acesso restrito
-          </h1>
-          <p className="text-sm text-muted leading-relaxed">
-            Este link requer um token de acesso valido. Solicite um novo link ao administrador.
-          </p>
-        </motion.div>
+        <div className="bg-white rounded-3xl border border-black/[0.04] shadow-xl p-10 max-w-sm w-full text-center">
+          <div className="w-14 h-14 rounded-2xl bg-red-500/10 flex items-center justify-center mx-auto mb-5"><Shield className="w-7 h-7 text-red-500" /></div>
+          <h1 className="text-xl font-bold text-foreground font-display tracking-tight mb-2">Acesso restrito</h1>
+          <p className="text-sm text-muted">Token invalido.</p>
+        </div>
       </div>
     );
   }
 
-  // Loading
-  if (loading) {
+  if (loading || !data) {
     return (
       <div className="min-h-screen bg-[#f5f5f7] flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-accent/30 border-t-accent rounded-full animate-spin" />
+        <div className="text-center">
+          <div className="w-10 h-10 border-2 border-accent/30 border-t-accent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-sm text-muted">Carregando hub...</p>
+        </div>
       </div>
     );
   }
 
-  const maxMonthCount = Math.max(...stats.byMonth.map(([, c]) => c), 1);
+  const projectsByHealth = [...data.projects].sort((a, b) => a.health - b.health);
+  const colLabels: Record<string, string> = { planejamento: "Plan.", em_desenvolvimento: "Dev.", em_andamento: "Ativo", pausado: "Pausa", concluido: "Done" };
 
   return (
-    <div className="min-h-screen bg-[#f5f5f7]">
-      {/* Top bar */}
-      <header className="sticky top-0 z-30 h-[56px] bg-white/70 backdrop-blur-xl border-b border-black/[0.04] flex items-center px-6 gap-4">
-        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#111d2e] to-[#152d4a] flex items-center justify-center">
-          <span className="text-white font-bold text-sm font-display">+</span>
-        </div>
-        <div>
-          <h2 className="text-[15px] font-semibold text-foreground font-display">
-            Grupo +351
-          </h2>
-          <p className="text-[10px] text-muted font-medium tracking-wide uppercase -mt-0.5">
-            Relatorio de Reunioes
-          </p>
-        </div>
-        <div className="flex-1" />
-        <a
-          href={`/reunioes/kanban?token=${token}`}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[12px] font-medium text-emerald-600 hover:text-emerald-800 bg-emerald-500/5 hover:bg-emerald-500/10 transition-all"
-        >
-          <Columns3 className="w-3.5 h-3.5" />
-          Kanban
-        </a>
-        <a
-          href={`/reunioes/roadmaps?token=${token}`}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[12px] font-medium text-amber-600 hover:text-amber-800 bg-amber-500/5 hover:bg-amber-500/10 transition-all"
-        >
-          <Map className="w-3.5 h-3.5" />
-          Roadmaps
-        </a>
-        <a
-          href={`/reunioes/inteligencia?token=${token}`}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[12px] font-medium text-violet-600 hover:text-violet-800 bg-violet-500/5 hover:bg-violet-500/10 transition-all"
-        >
-          <Brain className="w-3.5 h-3.5" />
-          Inteligencia
-        </a>
-        <button
-          onClick={handleCopyLink}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[12px] font-medium text-muted hover:text-foreground hover:bg-black/5 transition-all"
-        >
-          {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
-          {copied ? "Copiado" : "Copiar link"}
-        </button>
-        <div className="flex items-center gap-1.5 text-[11px] text-muted">
-          <Link2 className="w-3.5 h-3.5" />
-          Acesso por link
-        </div>
-      </header>
+    <div className="min-h-screen bg-[#f5f5f7] flex flex-col">
+      <SharedHeader active="hub" subtitle={`${data.totalProjetos} projetos · ${data.totalReunioes} reunioes`} />
 
-      {/* Content */}
-      <main className="max-w-5xl mx-auto p-5 lg:p-8">
+      <main className="flex-1 max-w-6xl mx-auto w-full p-5 lg:p-8">
         <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-6">
-          {/* Header */}
-          <motion.div variants={fadeUp} className="flex items-start justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-foreground font-display tracking-tight">
-                Reunioes
-              </h1>
-              <p className="text-muted text-sm mt-0.5">
-                {stats.total} reunioes registradas · {stats.totalAcoes} acoes identificadas
-              </p>
-            </div>
-            <div className="flex gap-1.5 bg-[#f0f0f2] rounded-xl p-1">
-              <button
-                onClick={() => setView("timeline")}
-                className={`px-3 py-1.5 rounded-lg text-[12px] font-medium transition-all ${
-                  view === "timeline" ? "bg-white shadow-sm text-foreground" : "text-muted hover:text-foreground"
-                }`}
-              >
-                Timeline
-              </button>
-              <button
-                onClick={() => setView("stats")}
-                className={`px-3 py-1.5 rounded-lg text-[12px] font-medium transition-all ${
-                  view === "stats" ? "bg-white shadow-sm text-foreground" : "text-muted hover:text-foreground"
-                }`}
-              >
-                Estatisticas
-              </button>
-            </div>
-          </motion.div>
+
+          {/* PULSO - Alerts */}
+          {data.alerts.length > 0 && (
+            <motion.div variants={fadeUp} className="space-y-2">
+              <div className="flex items-center gap-2 mb-1">
+                <Zap className="w-4 h-4 text-amber-500" />
+                <h2 className="text-[13px] font-semibold text-foreground uppercase tracking-wider">Pulso</h2>
+              </div>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                {data.alerts.map((alert, i) => {
+                  const ac = alertColors[alert.cor] || alertColors.amber;
+                  return (
+                    <a key={i} href={`${alert.link}?token=${token}`} className={`flex items-start gap-3 p-3.5 rounded-xl border ${ac.bg} ${ac.border} hover:shadow-md transition-all group`}>
+                      <div className={`w-2 h-2 rounded-full ${ac.dot} mt-1.5 shrink-0`} />
+                      <div className="min-w-0">
+                        <p className="text-[12px] font-semibold text-foreground leading-tight">{alert.titulo}</p>
+                        <p className="text-[11px] text-muted mt-0.5">{alert.descricao}</p>
+                      </div>
+                      <ChevronRight className="w-3.5 h-3.5 text-muted/30 group-hover:text-muted mt-0.5 shrink-0 ml-auto transition-colors" />
+                    </a>
+                  );
+                })}
+              </div>
+            </motion.div>
+          )}
 
           {/* KPIs */}
-          <motion.div variants={fadeUp} className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <motion.div variants={fadeUp} className="grid grid-cols-3 lg:grid-cols-6 gap-3">
             {[
-              { icon: CalendarDays, label: "Reunioes", value: stats.total, sub: `${stats.byMonth[0]?.[1] || 0} este mes`, color: "from-blue-500/10 to-blue-600/5", iconColor: "text-blue-500" },
-              { icon: ListChecks, label: "Acoes", value: stats.totalAcoes, sub: `${(stats.totalAcoes / Math.max(stats.total, 1)).toFixed(1)} por reuniao`, color: "from-emerald-500/10 to-emerald-600/5", iconColor: "text-emerald-500" },
-              { icon: Users, label: "Participantes", value: stats.people.length, sub: "unicos identificados", color: "from-violet-500/10 to-violet-600/5", iconColor: "text-violet-500" },
-              { icon: Tag, label: "Temas", value: stats.tags.length, sub: "topicos distintos", color: "from-amber-500/10 to-amber-600/5", iconColor: "text-amber-500" },
+              { icon: CalendarDays, value: data.totalReunioes, label: "Reunioes", color: "text-blue-500", bg: "from-blue-500/10 to-blue-600/5" },
+              { icon: Layers, value: data.totalProjetos, label: "Projetos", color: "text-indigo-500", bg: "from-indigo-500/10 to-indigo-600/5" },
+              { icon: ListChecks, value: data.totalAcoes, label: "Acoes", color: "text-emerald-500", bg: "from-emerald-500/10 to-emerald-600/5" },
+              { icon: Users, value: data.totalPessoas, label: "Pessoas", color: "text-violet-500", bg: "from-violet-500/10 to-violet-600/5" },
+              { icon: Target, value: data.projects.filter(p => p.health >= 70).length, label: "Saudaveis", color: "text-emerald-500", bg: "from-emerald-500/10 to-emerald-600/5" },
+              { icon: AlertTriangle, value: data.projects.filter(p => p.health < 40).length, label: "Em risco", color: "text-red-500", bg: "from-red-500/10 to-red-600/5" },
             ].map((kpi) => {
               const Icon = kpi.icon;
               return (
-                <div key={kpi.label} className="bg-white rounded-2xl border border-black/[0.04] p-5 hover:shadow-md transition-all duration-300">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${kpi.color} flex items-center justify-center`}>
-                      <Icon className={`w-[18px] h-[18px] ${kpi.iconColor}`} />
-                    </div>
+                <div key={kpi.label} className="bg-white rounded-2xl border border-black/[0.04] p-4 hover:shadow-md transition-all duration-300">
+                  <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${kpi.bg} flex items-center justify-center mb-2.5`}>
+                    <Icon className={`w-4 h-4 ${kpi.color}`} />
                   </div>
-                  <p className="text-2xl font-bold text-foreground tracking-tight">{kpi.value}</p>
-                  <p className="text-[11px] text-muted mt-0.5 uppercase tracking-wider font-medium">{kpi.sub}</p>
+                  <p className="text-xl font-bold text-foreground tracking-tight">{kpi.value}</p>
+                  <p className="text-[10px] text-muted uppercase tracking-wider font-medium">{kpi.label}</p>
                 </div>
               );
             })}
           </motion.div>
 
-          {view === "stats" ? (
-            <div className="grid lg:grid-cols-2 gap-4">
-              {/* Monthly Chart */}
-              <motion.div variants={fadeUp} className="bg-white rounded-2xl border border-black/[0.04] p-6">
-                <div className="flex items-center gap-2 mb-5">
-                  <BarChart3 className="w-4 h-4 text-accent" />
-                  <h2 className="font-semibold text-foreground text-[15px]">Reunioes por Mes</h2>
-                </div>
-                <div className="space-y-2.5">
-                  {stats.byMonth.map(([month, count]) => (
-                    <div key={month} className="flex items-center gap-3">
-                      <span className="text-[12px] text-muted w-20 shrink-0 capitalize">
-                        {formatMonth(month + "-01")}
-                      </span>
-                      <div className="flex-1 h-6 bg-[#f5f5f7] rounded-lg overflow-hidden">
-                        <motion.div
-                          className="h-full bg-gradient-to-r from-accent to-accent-light rounded-lg"
-                          initial={{ width: 0 }}
-                          animate={{ width: `${(count / maxMonthCount) * 100}%` }}
-                          transition={{ duration: 0.6, ease }}
-                        />
+          {/* Portfolio de Projetos */}
+          <motion.div variants={fadeUp}>
+            <div className="flex items-center gap-2 mb-3">
+              <Map className="w-4 h-4 text-amber-500" />
+              <h2 className="text-[13px] font-semibold text-foreground uppercase tracking-wider">Portfolio de Projetos</h2>
+              <div className="flex-1" />
+              {/* Column distribution */}
+              <div className="flex items-center gap-1.5">
+                {Object.entries(data.colDist).filter(([, v]) => v > 0).map(([col, count]) => {
+                  const st = statusConfig[col];
+                  return (
+                    <span key={col} className={`text-[9px] font-medium px-1.5 py-0.5 rounded ${st?.bg || ""} ${st?.color || "text-muted"}`}>
+                      {colLabels[col] || col} {count}
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
+              {data.projects.sort((a, b) => {
+                const po: Record<string, number> = { critica: 0, alta: 1, media: 2, baixa: 3 };
+                return (po[a.prioridade] ?? 9) - (po[b.prioridade] ?? 9);
+              }).map((p) => {
+                const prio = prioConfig[p.prioridade];
+                const days = daysSince(p.dataUltima);
+                return (
+                  <a key={p.id} href={`/reunioes/roadmaps?token=${token}`} className="bg-white rounded-xl border border-black/[0.04] p-3 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 group">
+                    <div className="flex items-start gap-2 mb-2">
+                      <HealthRing score={p.health} size={36} />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1 mb-0.5">
+                          <div className={`w-1.5 h-1.5 rounded-full ${prio?.dot || "bg-muted"}`} />
+                          <span className={`text-[8px] font-bold uppercase tracking-wider ${catIconColors[p.categoria] || "text-muted"}`}>{p.categoria}</span>
+                        </div>
+                        <h4 className="text-[11px] font-semibold text-foreground leading-tight line-clamp-2">{p.nome}</h4>
                       </div>
-                      <span className="text-[13px] font-semibold text-foreground w-6 text-right">{count}</span>
+                    </div>
+                    {/* Checklist bar */}
+                    {p.checkTotal > 0 && (
+                      <div className="flex items-center gap-1.5 mb-1.5">
+                        <div className="flex-1 h-1 bg-black/[0.04] rounded-full overflow-hidden">
+                          <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${(p.checkDone / p.checkTotal) * 100}%` }} />
+                        </div>
+                        <span className="text-[8px] text-muted">{p.checkDone}/{p.checkTotal}</span>
+                      </div>
+                    )}
+                    <div className="flex items-center gap-2 text-[9px] text-muted">
+                      <span>{p.totalReunioes}r</span>
+                      <span className="opacity-30">·</span>
+                      {days <= 7 ? (
+                        <span className="text-emerald-600 font-medium flex items-center gap-0.5"><Zap className="w-2.5 h-2.5" />Ativo</span>
+                      ) : (
+                        <span className="flex items-center gap-0.5"><Clock className="w-2.5 h-2.5" />{days}d</span>
+                      )}
+                      {p.responsavel && (
+                        <>
+                          <span className="opacity-30">·</span>
+                          <span className="truncate">{p.responsavel.split(" ")[0]}</span>
+                        </>
+                      )}
+                    </div>
+                  </a>
+                );
+              })}
+            </div>
+          </motion.div>
+
+          <div className="grid lg:grid-cols-3 gap-5">
+            {/* Ultimas reunioes */}
+            <motion.div variants={fadeUp} className="lg:col-span-2 bg-white rounded-2xl border border-black/[0.04] p-5">
+              <div className="flex items-center gap-2 mb-4">
+                <CalendarDays className="w-4 h-4 text-blue-500" />
+                <h2 className="text-[13px] font-semibold text-foreground uppercase tracking-wider">Ultimos 7 Dias</h2>
+                <div className="flex-1" />
+                <a href={`/reunioes/timeline?token=${token}`} className="text-[11px] text-accent font-medium flex items-center gap-1 hover:underline">
+                  Ver todas <ChevronRight className="w-3 h-3" />
+                </a>
+              </div>
+              <div className="space-y-2">
+                {data.recentMeetings.length === 0 && <p className="text-[12px] text-muted py-4 text-center">Nenhuma reuniao nos ultimos 7 dias</p>}
+                {data.recentMeetings.map((m, i) => (
+                  <div key={i} className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-[#f8f9fb] transition-colors">
+                    <div className="w-10 h-10 rounded-lg bg-[#f5f5f7] flex flex-col items-center justify-center shrink-0">
+                      <span className="text-[13px] font-bold text-foreground leading-none">{new Date(m.data + "T12:00:00").getDate()}</span>
+                      <span className="text-[8px] text-muted uppercase">{new Date(m.data + "T12:00:00").toLocaleDateString("pt-BR", { month: "short" })}</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[12px] font-medium text-foreground leading-tight">{m.titulo}</p>
+                      <div className="flex items-center gap-2 mt-1 text-[10px] text-muted">
+                        {m.participantes && <span><Users className="w-3 h-3 inline -mt-0.5" /> {m.participantes.length}</span>}
+                        {m.acoes && m.acoes.length > 0 && <span><CheckCircle2 className="w-3 h-3 inline -mt-0.5 text-emerald-500" /> {m.acoes.length} acoes</span>}
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap gap-1 max-w-[120px] justify-end">
+                      {(m.tags || []).slice(0, 2).map((t) => (
+                        <span key={t} className={`text-[8px] font-medium px-1.5 py-0.5 rounded ${getTagColor(t)}`}>{t}</span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+
+            {/* Right sidebar */}
+            <div className="space-y-4">
+              {/* Active people */}
+              <motion.div variants={fadeUp} className="bg-white rounded-2xl border border-black/[0.04] p-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <Users className="w-4 h-4 text-violet-500" />
+                  <h2 className="text-[13px] font-semibold text-foreground uppercase tracking-wider">Pessoas Ativas</h2>
+                </div>
+                <div className="space-y-1">
+                  {data.activePeople.map((p) => (
+                    <a key={p.nome} href={`/reunioes/pessoas/${slugify(p.nome)}?token=${token}`} className="flex items-center gap-2.5 py-1.5 px-2 rounded-lg hover:bg-[#f8f9fb] transition-colors group">
+                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-violet-500/10 to-violet-600/5 flex items-center justify-center text-[9px] font-bold text-violet-600 shrink-0">{p.nome.charAt(0)}</div>
+                      <span className="text-[12px] text-foreground flex-1 truncate group-hover:text-accent transition-colors">{p.nome}</span>
+                      <span className="text-[10px] text-muted">{p.count}r</span>
+                    </a>
+                  ))}
+                </div>
+              </motion.div>
+
+              {/* Emerging topics */}
+              <motion.div variants={fadeUp} className="bg-white rounded-2xl border border-black/[0.04] p-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <TrendingUp className="w-4 h-4 text-emerald-500" />
+                  <h2 className="text-[13px] font-semibold text-foreground uppercase tracking-wider">Emergentes</h2>
+                </div>
+                <div className="space-y-1.5">
+                  {data.emerging.map((t) => (
+                    <div key={t.tema} className="flex items-center gap-2 px-2 py-1">
+                      <Lightbulb className="w-3 h-3 text-amber-500 shrink-0" />
+                      <span className={`text-[11px] font-medium px-2 py-0.5 rounded ${getTagColor(t.tema)}`}>{t.tema}</span>
+                      <div className="flex-1" />
+                      <span className="text-[9px] text-muted">{t.anterior}</span>
+                      <ArrowRight className="w-2.5 h-2.5 text-emerald-500" />
+                      <span className="text-[10px] font-bold text-emerald-600">{t.recente}</span>
                     </div>
                   ))}
                 </div>
               </motion.div>
-
-              {/* Top People */}
-              <motion.div variants={fadeUp} className="bg-white rounded-2xl border border-black/[0.04] p-6">
-                <div className="flex items-center gap-2 mb-5">
-                  <Users className="w-4 h-4 text-violet-500" />
-                  <h2 className="font-semibold text-foreground text-[15px]">Participantes Mais Frequentes</h2>
-                </div>
-                <div className="space-y-1.5">
-                  {stats.people.map(([name, count], i) => (
-                    <button
-                      key={name}
-                      onClick={() => {
-                        setSelectedPerson(name === selectedPerson ? null : name);
-                        setView("timeline");
-                      }}
-                      className="flex items-center gap-3 w-full px-3 py-2 rounded-xl hover:bg-[#f5f5f7] transition-all text-left"
-                    >
-                      <div className="w-7 h-7 rounded-full bg-gradient-to-br from-violet-500/10 to-violet-600/5 flex items-center justify-center text-[10px] font-bold text-violet-600 shrink-0">
-                        {i + 1}
-                      </div>
-                      <span className="text-[13px] text-foreground flex-1 truncate">{name}</span>
-                      <span className="text-[12px] text-muted font-medium">{count} reunioes</span>
-                    </button>
-                  ))}
-                </div>
-              </motion.div>
-
-              {/* Top Tags */}
-              <motion.div variants={fadeUp} className="bg-white rounded-2xl border border-black/[0.04] p-6 lg:col-span-2">
-                <div className="flex items-center gap-2 mb-5">
-                  <Tag className="w-4 h-4 text-amber-500" />
-                  <h2 className="font-semibold text-foreground text-[15px]">Temas Mais Discutidos</h2>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {stats.tags.map(([tag, count]) => (
-                    <button
-                      key={tag}
-                      onClick={() => {
-                        setSelectedTag(tag === selectedTag ? null : tag);
-                        setView("timeline");
-                      }}
-                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium transition-all hover:shadow-sm ${getTagColor(tag)}`}
-                    >
-                      {tag}
-                      <span className="opacity-60">({count})</span>
-                    </button>
-                  ))}
-                </div>
-              </motion.div>
             </div>
-          ) : (
-            <>
-              {/* Search & Filters */}
-              <motion.div variants={fadeUp} className="flex flex-col sm:flex-row gap-3">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted/40" />
-                  <input
-                    type="text"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Buscar reunioes, participantes, temas..."
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-black/[0.06] bg-white text-[13px] text-foreground placeholder:text-muted/40 focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent/30 transition-all"
-                  />
+          </div>
+
+          {/* Proximos Passos Consolidados */}
+          <motion.div variants={fadeUp} className="bg-white rounded-2xl border border-black/[0.04] p-5">
+            <div className="flex items-center gap-2 mb-4">
+              <Flag className="w-4 h-4 text-accent" />
+              <h2 className="text-[13px] font-semibold text-foreground uppercase tracking-wider">Proximos Passos</h2>
+              <span className="text-[10px] text-muted">Consolidado de todos os projetos</span>
+            </div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-1.5">
+              {data.nextActions.map((a, i) => (
+                <div key={i} className="flex items-start gap-2 py-1.5">
+                  <ArrowRight className="w-3 h-3 text-accent mt-0.5 shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-[11px] text-foreground leading-relaxed">{a.acao}</p>
+                    <p className="text-[9px] text-muted">{a.projeto} · {formatDateShort(a.data)}</p>
+                  </div>
                 </div>
-                {(selectedTag || selectedPerson) && (
-                  <div className="flex gap-2 items-center">
-                    {selectedTag && (
-                      <button
-                        onClick={() => setSelectedTag(null)}
-                        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-accent/10 text-accent text-[12px] font-medium"
-                      >
-                        <Filter className="w-3 h-3" />
-                        {selectedTag}
-                        <X className="w-3 h-3" />
-                      </button>
-                    )}
-                    {selectedPerson && (
-                      <button
-                        onClick={() => setSelectedPerson(null)}
-                        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-violet-500/10 text-violet-700 text-[12px] font-medium"
-                      >
-                        <Users className="w-3 h-3" />
-                        {selectedPerson}
-                        <X className="w-3 h-3" />
-                      </button>
-                    )}
-                  </div>
-                )}
-              </motion.div>
-
-              {(search || selectedTag || selectedPerson) && (
-                <p className="text-[12px] text-muted">
-                  {filtered.length} de {stats.total} reunioes
-                </p>
-              )}
-
-              {/* Grouped by month */}
-              {grouped.map(([month, meetings]) => (
-                <motion.div key={month} variants={fadeUp} className="space-y-2.5">
-                  <div className="flex items-center gap-3 mb-1">
-                    <div className="w-2 h-2 rounded-full bg-accent" />
-                    <h3 className="text-[13px] font-semibold text-foreground uppercase tracking-wider capitalize">
-                      {formatMonth(month + "-01")}
-                    </h3>
-                    <span className="text-[11px] text-muted font-medium">{meetings.length} reunioes</span>
-                    <div className="flex-1 h-px bg-black/[0.04]" />
-                  </div>
-
-                  {meetings.map((r, i) => {
-                    const globalIdx = reunioes.indexOf(r);
-                    const isExpanded = expanded.has(globalIdx);
-                    return (
-                      <div
-                        key={`${r.data}-${i}`}
-                        className="bg-white rounded-2xl border border-black/[0.04] overflow-hidden hover:shadow-md transition-all duration-300"
-                      >
-                        <button
-                          onClick={() => toggleExpand(globalIdx)}
-                          className="w-full flex items-start gap-4 p-5 text-left"
-                        >
-                          <div className="w-12 h-12 rounded-xl bg-[#f5f5f7] flex flex-col items-center justify-center shrink-0">
-                            <span className="text-[15px] font-bold text-foreground leading-none">
-                              {new Date(r.data + "T12:00:00").getDate()}
-                            </span>
-                            <span className="text-[9px] text-muted uppercase font-medium mt-0.5">
-                              {new Date(r.data + "T12:00:00").toLocaleDateString("pt-BR", { month: "short" })}
-                            </span>
-                          </div>
-
-                          <div className="flex-1 min-w-0">
-                            <h4 className="text-[14px] font-semibold text-foreground tracking-[-0.01em] leading-snug mb-1.5">
-                              {r.titulo}
-                            </h4>
-                            <div className="flex flex-wrap gap-1.5">
-                              {r.tags?.slice(0, 4).map((tag) => (
-                                <span key={tag} className={`text-[10px] font-medium px-2 py-0.5 rounded-md ${getTagColor(tag)}`}>
-                                  {tag}
-                                </span>
-                              ))}
-                              {(r.tags?.length || 0) > 4 && (
-                                <span className="text-[10px] text-muted font-medium px-2 py-0.5">
-                                  +{(r.tags?.length || 0) - 4}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-3 shrink-0">
-                            {r.participantes && (
-                              <div className="flex items-center gap-1 text-muted">
-                                <Users className="w-3.5 h-3.5" />
-                                <span className="text-[11px] font-medium">{r.participantes.length}</span>
-                              </div>
-                            )}
-                            {r.acoes && r.acoes.length > 0 && (
-                              <div className="flex items-center gap-1 text-emerald-600">
-                                <CheckCircle2 className="w-3.5 h-3.5" />
-                                <span className="text-[11px] font-medium">{r.acoes.length}</span>
-                              </div>
-                            )}
-                            <motion.div
-                              animate={{ rotate: isExpanded ? 180 : 0 }}
-                              transition={{ duration: 0.2 }}
-                            >
-                              <ChevronDown className="w-4 h-4 text-muted/40" />
-                            </motion.div>
-                          </div>
-                        </button>
-
-                        <AnimatePresence>
-                          {isExpanded && (
-                            <motion.div
-                              initial={{ height: 0, opacity: 0 }}
-                              animate={{ height: "auto", opacity: 1 }}
-                              exit={{ height: 0, opacity: 0 }}
-                              transition={{ duration: 0.3, ease }}
-                              className="overflow-hidden"
-                            >
-                              <div className="px-5 pb-5 pt-0 border-t border-black/[0.04]">
-                                <div className="pt-4 space-y-4">
-                                  {r.resumo && (
-                                    <div>
-                                      <div className="flex items-center gap-2 mb-2">
-                                        <MessageSquare className="w-3.5 h-3.5 text-accent" />
-                                        <span className="text-[11px] font-semibold text-foreground uppercase tracking-wider">
-                                          Resumo
-                                        </span>
-                                      </div>
-                                      <p className="text-[13px] text-muted leading-[1.7] pl-5">
-                                        {r.resumo}
-                                      </p>
-                                    </div>
-                                  )}
-
-                                  {r.participantes && r.participantes.length > 0 && (
-                                    <div>
-                                      <div className="flex items-center gap-2 mb-2">
-                                        <Users className="w-3.5 h-3.5 text-violet-500" />
-                                        <span className="text-[11px] font-semibold text-foreground uppercase tracking-wider">
-                                          Participantes
-                                        </span>
-                                      </div>
-                                      <div className="flex flex-wrap gap-1.5 pl-5">
-                                        {r.participantes.map((p) => (
-                                          <button
-                                            key={p}
-                                            onClick={(e) => {
-                                              e.stopPropagation();
-                                              const name = p.replace(/\s*\(.*?\)\s*/g, "").trim();
-                                              setSelectedPerson(name === selectedPerson ? null : name);
-                                            }}
-                                            className="text-[11px] font-medium px-2.5 py-1 rounded-lg bg-violet-500/[0.06] text-violet-700 hover:bg-violet-500/10 transition-colors"
-                                          >
-                                            {p}
-                                          </button>
-                                        ))}
-                                      </div>
-                                    </div>
-                                  )}
-
-                                  {r.acoes && r.acoes.length > 0 && (
-                                    <div>
-                                      <div className="flex items-center gap-2 mb-2">
-                                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-                                        <span className="text-[11px] font-semibold text-foreground uppercase tracking-wider">
-                                          Acoes ({r.acoes.length})
-                                        </span>
-                                      </div>
-                                      <ul className="space-y-1.5 pl-5">
-                                        {r.acoes.map((acao, ai) => (
-                                          <li key={ai} className="flex items-start gap-2">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 shrink-0" />
-                                            <span className="text-[13px] text-muted leading-[1.6]">{acao}</span>
-                                          </li>
-                                        ))}
-                                      </ul>
-                                    </div>
-                                  )}
-
-                                  {r.tags && r.tags.length > 4 && (
-                                    <div>
-                                      <div className="flex items-center gap-2 mb-2">
-                                        <Tag className="w-3.5 h-3.5 text-amber-500" />
-                                        <span className="text-[11px] font-semibold text-foreground uppercase tracking-wider">
-                                          Todos os Temas
-                                        </span>
-                                      </div>
-                                      <div className="flex flex-wrap gap-1.5 pl-5">
-                                        {r.tags.map((tag) => (
-                                          <button
-                                            key={tag}
-                                            onClick={(e) => {
-                                              e.stopPropagation();
-                                              setSelectedTag(tag === selectedTag ? null : tag);
-                                            }}
-                                            className={`text-[10px] font-medium px-2 py-0.5 rounded-md transition-all hover:shadow-sm ${getTagColor(tag)}`}
-                                          >
-                                            {tag}
-                                          </button>
-                                        ))}
-                                      </div>
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </div>
-                    );
-                  })}
-                </motion.div>
               ))}
+            </div>
+          </motion.div>
 
-              {filtered.length === 0 && (
-                <div className="text-center py-16">
-                  <CalendarDays className="w-10 h-10 text-muted/20 mx-auto mb-3" />
-                  <p className="text-muted text-sm">Nenhuma reuniao encontrada</p>
-                </div>
-              )}
-            </>
-          )}
         </motion.div>
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-black/[0.04] py-6 mt-12">
-        <p className="text-center text-[11px] text-muted/50">
-          Grupo +351 · Relatorio de Governanca · Acesso restrito por link
-        </p>
+      <footer className="border-t border-black/[0.04] py-4">
+        <p className="text-center text-[11px] text-muted/50">Grupo +351 · Hub de Governanca</p>
       </footer>
     </div>
   );
