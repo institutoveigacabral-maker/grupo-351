@@ -31,6 +31,7 @@ import {
   Repeat,
   User,
   Tag,
+  Map,
 } from "lucide-react";
 
 const ease = [0.16, 1, 0.3, 1] as const;
@@ -233,6 +234,13 @@ export default function InteligenciaPage() {
         >
           <CalendarDays className="w-3.5 h-3.5" />
           Ver reunioes
+        </a>
+        <a
+          href={`/reunioes/roadmaps?token=${token}`}
+          className="text-[12px] text-amber-600 hover:text-amber-800 font-medium flex items-center gap-1.5 bg-amber-500/5 hover:bg-amber-500/10 px-3 py-1.5 rounded-lg transition-all"
+        >
+          <Map className="w-3.5 h-3.5" />
+          Roadmaps
         </a>
         <div className="h-4 w-px bg-border" />
         <button onClick={handleCopyLink} className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[12px] font-medium text-muted hover:text-foreground hover:bg-black/5 transition-all">

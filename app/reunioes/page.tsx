@@ -20,6 +20,7 @@ import {
   Copy,
   Check,
   Brain,
+  Map,
 } from "lucide-react";
 
 interface Reuniao {
@@ -235,6 +236,13 @@ export default function ReunioesPublicPage() {
           </p>
         </div>
         <div className="flex-1" />
+        <a
+          href={`/reunioes/roadmaps?token=${token}`}
+          className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[12px] font-medium text-amber-600 hover:text-amber-800 bg-amber-500/5 hover:bg-amber-500/10 transition-all"
+        >
+          <Map className="w-3.5 h-3.5" />
+          Roadmaps
+        </a>
         <a
           href={`/reunioes/inteligencia?token=${token}`}
           className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[12px] font-medium text-violet-600 hover:text-violet-800 bg-violet-500/5 hover:bg-violet-500/10 transition-all"
