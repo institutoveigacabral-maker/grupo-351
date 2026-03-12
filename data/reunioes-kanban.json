@@ -1,0 +1,1035 @@
+{
+  "geradoEm": "2026-03-12 23:16",
+  "colunas": {
+    "planejamento": {
+      "nome": "Planejamento",
+      "ordem": 0
+    },
+    "em_desenvolvimento": {
+      "nome": "Em Desenvolvimento",
+      "ordem": 1
+    },
+    "em_andamento": {
+      "nome": "Em Andamento",
+      "ordem": 2
+    },
+    "pausado": {
+      "nome": "Pausado",
+      "ordem": 3
+    },
+    "concluido": {
+      "nome": "Concluido",
+      "ordem": 4
+    }
+  },
+  "cards": [
+    {
+      "id": "ipo-b4",
+      "nome": "IPO via B4 / Rota Facil",
+      "descricao": "Processo de abertura de capital do Grupo Rao na B4 (antiga BEE4) atraves do reality show Rota Facil. Valuation estimado R$150-160M. Unico representante do RJ entre 15 finalistas.",
+      "coluna": "em_andamento",
+      "prioridade": "critica",
+      "categoria": "Estrategico",
+      "responsavel": "Adamilson",
+      "participantes": [
+        "Adamilson",
+        "Alcides",
+        "Alessandra",
+        "Alessandro",
+        "Antonio"
+      ],
+      "totalReunioes": 38,
+      "totalAcoes": 281,
+      "dataInicio": "2025-12-19",
+      "dataUltima": "2026-03-06",
+      "notas": "",
+      "checklist": [
+        {
+          "texto": "Equipe entregar todas as solicitacoes no menor tempo possivel para alcancar a listagem",
+          "feito": false
+        },
+        {
+          "texto": "Guilherme assumir posicao de maior protagonismo no processo",
+          "feito": false
+        },
+        {
+          "texto": "Time completo disponivel para demandas proativas",
+          "feito": false
+        },
+        {
+          "texto": "Ricardo conversar com socio Damon sobre a parceria",
+          "feito": false
+        },
+        {
+          "texto": "Lucas e Henrique definir especificacoes de preco alvo para o Nori no Brasil",
+          "feito": false
+        },
+        {
+          "texto": "Ricardo disponibilizar diferentes opcoes de Nori com faixas de preco",
+          "feito": false
+        }
+      ],
+      "tagsPrincipais": [
+        "ABF",
+        "Acelera",
+        "Arca",
+        "Arroz",
+        "Assault Fitness",
+        "Automacao"
+      ],
+      "ordem": 0
+    },
+    {
+      "id": "china-supply",
+      "nome": "Supply Chain China + Importacao",
+      "descricao": "Estruturacao da cadeia de suprimentos com China: importacao de insumos (nori, arroz, molhos), mochilas LED, kits robotica, equipamentos fitness. Canton Fair, Yiwu, Shenzhen.",
+      "coluna": "em_andamento",
+      "prioridade": "alta",
+      "categoria": "Operacional",
+      "responsavel": "Adamilson",
+      "participantes": [
+        "Adamilson",
+        "Alcides",
+        "Aninha",
+        "Antonia",
+        "Antonio"
+      ],
+      "totalReunioes": 43,
+      "totalAcoes": 331,
+      "dataInicio": "2025-11-14",
+      "dataUltima": "2026-03-11",
+      "notas": "",
+      "checklist": [
+        {
+          "texto": "Henrique revisar materiais do plano de negocios",
+          "feito": false
+        },
+        {
+          "texto": "Bento enviar apresentacao atualizada com numeros",
+          "feito": false
+        },
+        {
+          "texto": "Agendar reuniao de acompanhamento para sexta-feira",
+          "feito": false
+        },
+        {
+          "texto": "Operar unidade do Barra World por 3-6 meses para validacao",
+          "feito": false
+        },
+        {
+          "texto": "Estruturar formalmente a empresa franqueadora com CNPJ",
+          "feito": false
+        },
+        {
+          "texto": "Henrique trazer kits de robotica da China em abril",
+          "feito": false
+        }
+      ],
+      "tagsPrincipais": [
+        "ABF",
+        "Alibaba",
+        "Amazon",
+        "Amigamente",
+        "Anvisa",
+        "Argentina"
+      ],
+      "ordem": 1
+    },
+    {
+      "id": "portugal-ops",
+      "nome": "Operacoes Portugal / Grupo +351",
+      "descricao": "Hub de negocios em Cascais: Sushi Rao PT, impressao 3D, Prismatica, Go By Tesla, Purple Party. Expansao de marcas brasileiras para Europa.",
+      "coluna": "em_andamento",
+      "prioridade": "alta",
+      "categoria": "Expansao",
+      "responsavel": "Adamilson",
+      "participantes": [
+        "Adamilson",
+        "Alcides",
+        "Alessandra",
+        "Alessandro",
+        "Aninha"
+      ],
+      "totalReunioes": 37,
+      "totalAcoes": 268,
+      "dataInicio": "2025-11-14",
+      "dataUltima": "2026-03-11",
+      "notas": "",
+      "checklist": [
+        {
+          "texto": "Lucas obter acesso a plataforma Giant Union",
+          "feito": false
+        },
+        {
+          "texto": "Henrique contatar Ricardo sobre operacoes em Portugal",
+          "feito": false
+        },
+        {
+          "texto": "Lucas continuar processo de certificacao Anvisa com Yuri",
+          "feito": false
+        },
+        {
+          "texto": "Ricardo trazer amostras ate final de marco",
+          "feito": false
+        },
+        {
+          "texto": "Apresentar Nori no comite de franqueados em abril",
+          "feito": false
+        },
+        {
+          "texto": "Lancamento planejado para maio",
+          "feito": false
+        }
+      ],
+      "tagsPrincipais": [
+        "1KM",
+        "1KM+",
+        "ABF",
+        "Alcides/Cassio Schneider",
+        "Alice Ninho Limao",
+        "Alten"
+      ],
+      "ordem": 2
+    },
+    {
+      "id": "fundier-ia",
+      "nome": "Fundier Systems / Foundation Systems",
+      "descricao": "Plataforma de IA com clones cognitivos, otimizacao semantica (GEO), WhatsApp bots, marketplace de assistentes IA. Sociedade 50/50.",
+      "coluna": "em_andamento",
+      "prioridade": "alta",
+      "categoria": "Tecnologia",
+      "responsavel": "Alessandro",
+      "participantes": [
+        "Alessandro",
+        "Alexandre Tito",
+        "Antonio",
+        "Ariel",
+        "Brunao"
+      ],
+      "totalReunioes": 29,
+      "totalAcoes": 203,
+      "dataInicio": "2026-01-15",
+      "dataUltima": "2026-03-10",
+      "notas": "",
+      "checklist": [
+        {
+          "texto": "Reuniao amanha as 11h com diretora do Entrecot e Cesar",
+          "feito": false
+        },
+        {
+          "texto": "Henrique confirmar horario para sexta com Valdomiro (Table Win)",
+          "feito": false
+        },
+        {
+          "texto": "Enviar relatorio da Naya e link da Peel Beats",
+          "feito": false
+        },
+        {
+          "texto": "Concluir desenho 3D para mostrar na sexta para Raul",
+          "feito": false
+        },
+        {
+          "texto": "Henrique enviar nome da marca para Tarcisio gerar relatorio Naya",
+          "feito": false
+        },
+        {
+          "texto": "Tarcisio gerar e enviar relatorio da Naya",
+          "feito": false
+        }
+      ],
+      "tagsPrincipais": [
+        "AWS",
+        "Agentes IA",
+        "Alibaba",
+        "Alice Ninho Limao",
+        "Arca",
+        "Ariel"
+      ],
+      "ordem": 3
+    },
+    {
+      "id": "paraguai",
+      "nome": "Expansao Paraguai + Maquila",
+      "descricao": "Hub na America Latina: estruturacao juridica/fiscal, lei da Maquila para producao de molhos, parceria com Alcides/Ilan, pipeline fiscal global (PT, EUA, China, PY).",
+      "coluna": "em_andamento",
+      "prioridade": "alta",
+      "categoria": "Expansao",
+      "responsavel": "Adamilson",
+      "participantes": [
+        "Adamilson",
+        "Alcides",
+        "Antonio",
+        "Brunao",
+        "Bruno"
+      ],
+      "totalReunioes": 20,
+      "totalAcoes": 147,
+      "dataInicio": "2025-11-14",
+      "dataUltima": "2026-01-28",
+      "notas": "",
+      "checklist": [
+        {
+          "texto": "Diego: Apresentar proposta completa para Marcelo sobre a parceria",
+          "feito": false
+        },
+        {
+          "texto": "Diego: Dar feedback apos conversa com Marcelo",
+          "feito": false
+        },
+        {
+          "texto": "Diego: Verificar disponibilidade de Marcelo para reuniao antes do embarque (dia 3) ou em Sao Paulo",
+          "feito": false
+        },
+        {
+          "texto": "Henrique: Enviar apresentacao mais detalhada caso haja proxima reuniao",
+          "feito": false
+        },
+        {
+          "texto": "Henrique: Dar acesso a plataforma Longview para analise",
+          "feito": false
+        },
+        {
+          "texto": "Carol: Compartilhar contato de Henrique com Diego",
+          "feito": false
+        }
+      ],
+      "tagsPrincipais": [
+        "1KM+",
+        "ABF",
+        "Alcides/Cassio Schneider",
+        "Argentina",
+        "Arroz",
+        "Automacao"
+      ],
+      "ordem": 4
+    },
+    {
+      "id": "brook-wellness",
+      "nome": "Brook / Tech Wellness 021",
+      "descricao": "Holding de tech wellness: Brook (running), BRUC/Hyrox (fitness), esteira manual curvada, e-commerce 1KM+, dados de saude. IPO planejado.",
+      "coluna": "em_andamento",
+      "prioridade": "alta",
+      "categoria": "Wellness",
+      "responsavel": "Alexandre Tito",
+      "participantes": [
+        "Alexandre Tito",
+        "Ariel",
+        "Bruno",
+        "Camila",
+        "Cesar"
+      ],
+      "totalReunioes": 20,
+      "totalAcoes": 142,
+      "dataInicio": "2025-12-14",
+      "dataUltima": "2026-03-11",
+      "notas": "",
+      "checklist": [
+        {
+          "texto": "Leao preparar documento com estrutura do projeto (roadmap, cronograma, custos, equipe)",
+          "feito": false
+        },
+        {
+          "texto": "Agendar call de acompanhamento apos envio do documento",
+          "feito": false
+        },
+        {
+          "texto": "Henrique organizar evento no Nolita dia 18/3 para transmissao B4",
+          "feito": false
+        },
+        {
+          "texto": "Juliana focar agenda Sao Paulo (11-16/3): eventos, reunioes, lancamento do livro",
+          "feito": false
+        },
+        {
+          "texto": "Juliana marcar cafe com Danilo da Meituan",
+          "feito": false
+        },
+        {
+          "texto": "Juliana explorar oportunidades de M&A com iFood (Table-in e Naia)",
+          "feito": false
+        }
+      ],
+      "tagsPrincipais": [
+        "1KM",
+        "1KM+",
+        "Alten",
+        "Arca",
+        "Ariel",
+        "Assault Fitness"
+      ],
+      "ordem": 5
+    },
+    {
+      "id": "naia-geo",
+      "nome": "NAIA / GEO (Generative Engine Optimization)",
+      "descricao": "Plataforma de otimizacao para motores de IA (GEO). Posicionamento de marcas para serem encontradas por ChatGPT, Claude, Gemini. Produto SaaS.",
+      "coluna": "em_desenvolvimento",
+      "prioridade": "alta",
+      "categoria": "Tecnologia",
+      "responsavel": "Ariel",
+      "participantes": [
+        "Ariel",
+        "Camila",
+        "Cesar",
+        "Coqueiro",
+        "Dani"
+      ],
+      "totalReunioes": 9,
+      "totalAcoes": 75,
+      "dataInicio": "2026-02-16",
+      "dataUltima": "2026-03-10",
+      "notas": "",
+      "checklist": [
+        {
+          "texto": "Reuniao amanha as 11h com diretora do Entrecot e Cesar",
+          "feito": false
+        },
+        {
+          "texto": "Henrique confirmar horario para sexta com Valdomiro (Table Win)",
+          "feito": false
+        },
+        {
+          "texto": "Enviar relatorio da Naya e link da Peel Beats",
+          "feito": false
+        },
+        {
+          "texto": "Concluir desenho 3D para mostrar na sexta para Raul",
+          "feito": false
+        },
+        {
+          "texto": "Henrique enviar nome da marca para Tarcisio gerar relatorio Naya",
+          "feito": false
+        },
+        {
+          "texto": "Tarcisio gerar e enviar relatorio da Naya",
+          "feito": false
+        }
+      ],
+      "tagsPrincipais": [
+        "Arca",
+        "Ariel",
+        "Axis Backpack",
+        "B4 Reality Show",
+        "BF",
+        "Brasel"
+      ],
+      "ordem": 0
+    },
+    {
+      "id": "table-win",
+      "nome": "Table Win / Table In",
+      "descricao": "Plataforma para restaurantes com WhatsApp IA, PDV integrado, dados de clientes. Parceria com Grupo Rao e Sushi Rao Portugal.",
+      "coluna": "em_desenvolvimento",
+      "prioridade": "media",
+      "categoria": "Tecnologia",
+      "responsavel": "Adamilson",
+      "participantes": [
+        "Adamilson",
+        "Alessandro",
+        "Ariel",
+        "Caio",
+        "Camila"
+      ],
+      "totalReunioes": 19,
+      "totalAcoes": 121,
+      "dataInicio": "2025-10-30",
+      "dataUltima": "2026-03-10",
+      "notas": "",
+      "checklist": [
+        {
+          "texto": "Reuniao amanha as 11h com diretora do Entrecot e Cesar",
+          "feito": false
+        },
+        {
+          "texto": "Henrique confirmar horario para sexta com Valdomiro (Table Win)",
+          "feito": false
+        },
+        {
+          "texto": "Enviar relatorio da Naya e link da Peel Beats",
+          "feito": false
+        },
+        {
+          "texto": "Concluir desenho 3D para mostrar na sexta para Raul",
+          "feito": false
+        },
+        {
+          "texto": "Henrique enviar nome da marca para Tarcisio gerar relatorio Naya",
+          "feito": false
+        },
+        {
+          "texto": "Tarcisio gerar e enviar relatorio da Naya",
+          "feito": false
+        }
+      ],
+      "tagsPrincipais": [
+        "1KM+",
+        "Assistente.ia",
+        "Axis Backpack",
+        "BFOR",
+        "Bolt",
+        "Brook"
+      ],
+      "ordem": 1
+    },
+    {
+      "id": "mochilas-led",
+      "nome": "Axis Backpack / Mochilas LED",
+      "descricao": "Importacao e venda de mochilas com painel LED da China. E-commerce Amazon + marca propria.",
+      "coluna": "em_andamento",
+      "prioridade": "media",
+      "categoria": "E-commerce",
+      "responsavel": "Antonio",
+      "participantes": [
+        "Antonio",
+        "Arson",
+        "Brunao",
+        "Camila",
+        "Camilinha"
+      ],
+      "totalReunioes": 14,
+      "totalAcoes": 114,
+      "dataInicio": "2025-12-19",
+      "dataUltima": "2026-03-05",
+      "notas": "",
+      "checklist": [
+        {
+          "texto": "Henrique enviar contrato para Mario para formalizacao da parceria",
+          "feito": false
+        },
+        {
+          "texto": "Henrique enviar copia do passaporte para Mario (primeira pagina)",
+          "feito": false
+        },
+        {
+          "texto": "Mario pesquisar melhor localizacao para estrutura empresarial (Dubai, Hong Kong ou China)",
+          "feito": false
+        },
+        {
+          "texto": "Criar grupo WeChat incluindo Henrique, Mario e desenvolvedor",
+          "feito": false
+        },
+        {
+          "texto": "Integrar PDV com RP hoje",
+          "feito": false
+        },
+        {
+          "texto": "Reuniao agendada as 17:00",
+          "feito": false
+        }
+      ],
+      "tagsPrincipais": [
+        "1KM",
+        "Alibaba",
+        "Amazon",
+        "Assault Fitness",
+        "Axis Backpack",
+        "B4"
+      ],
+      "ordem": 6
+    },
+    {
+      "id": "hidden-usa",
+      "nome": "Hidden USA / Orlando",
+      "descricao": "Operacao nos EUA: dark kitchen em Orlando, Hunters Cookie, barbearia, financiamento imobiliario.",
+      "coluna": "em_andamento",
+      "prioridade": "media",
+      "categoria": "Expansao",
+      "responsavel": "Aninha",
+      "participantes": [
+        "Aninha",
+        "Caju",
+        "Camila",
+        "Carol",
+        "Cesar"
+      ],
+      "totalReunioes": 11,
+      "totalAcoes": 75,
+      "dataInicio": "2025-10-30",
+      "dataUltima": "2026-01-31",
+      "notas": "",
+      "checklist": [
+        {
+          "texto": "Junior: Reduzir operacao do Hiden para 5-6 dias/semana com equipe minima (2-3 pessoas)",
+          "feito": false
+        },
+        {
+          "texto": "Junior: Conversar transparentemente com fiadora do financiamento sobre situacao financeira",
+          "feito": false
+        },
+        {
+          "texto": "Junior: Agendar reuniao com proprietario do Camilas para oferecer o ponto",
+          "feito": false
+        },
+        {
+          "texto": "Junior: Marcar conversa com Kiko (KLB) sobre oportunidades de investimento ou parceria",
+          "feito": false
+        },
+        {
+          "texto": "Junior: Continuar produzindo conteudo focado em empreendedorismo e negocios em Orlando",
+          "feito": false
+        },
+        {
+          "texto": "Henrique: Continuar buscando investidores para o projeto Hunters Cookie",
+          "feito": false
+        }
+      ],
+      "tagsPrincipais": [
+        "1KM+",
+        "Avenue",
+        "Brook",
+        "Cascais",
+        "China",
+        "Comet Browser"
+      ],
+      "ordem": 7
+    },
+    {
+      "id": "pego-innova",
+      "nome": "Pego / Innova SA (Holding)",
+      "descricao": "Holding tech com Valter: Pego (retail tech), aceleradora, BPO contabil, estruturacao societaria.",
+      "coluna": "em_andamento",
+      "prioridade": "media",
+      "categoria": "Holding",
+      "responsavel": "Ariel",
+      "participantes": [
+        "Ariel",
+        "Bruno",
+        "Camila",
+        "Camilinha",
+        "Cesar"
+      ],
+      "totalReunioes": 10,
+      "totalAcoes": 66,
+      "dataInicio": "2026-01-13",
+      "dataUltima": "2026-03-11",
+      "notas": "",
+      "checklist": [
+        {
+          "texto": "Leao preparar documento com estrutura do projeto (roadmap, cronograma, custos, equipe)",
+          "feito": false
+        },
+        {
+          "texto": "Agendar call de acompanhamento apos envio do documento",
+          "feito": false
+        },
+        {
+          "texto": "Henrique enviar documentos (acordo de socios, roadmap) para revisao",
+          "feito": false
+        },
+        {
+          "texto": "Henrique ligar para parceiro da LivePag e marcar reuniao sexta-feira as 10h",
+          "feito": false
+        },
+        {
+          "texto": "Henrique comecar participacao em reunioes semanais da equipe",
+          "feito": false
+        },
+        {
+          "texto": "Gabriel D'Abruto preparar release e materiais de divulgacao",
+          "feito": false
+        }
+      ],
+      "tagsPrincipais": [
+        "1KM+",
+        "Acelera",
+        "Agentes IA",
+        "B4",
+        "BPO",
+        "Brook"
+      ],
+      "ordem": 8
+    },
+    {
+      "id": "prismatica",
+      "nome": "Prismatica Pro - Impressao 3D",
+      "descricao": "Franquia digital de impressao 3D. Expansao para Portugal. Miniaturas personalizadas, influenciadores.",
+      "coluna": "em_desenvolvimento",
+      "prioridade": "media",
+      "categoria": "Tecnologia",
+      "responsavel": "Alessandra",
+      "participantes": [
+        "Alessandra",
+        "Alessandro",
+        "Ariel",
+        "Camila",
+        "Camilinha"
+      ],
+      "totalReunioes": 10,
+      "totalAcoes": 71,
+      "dataInicio": "2025-12-14",
+      "dataUltima": "2026-03-10",
+      "notas": "",
+      "checklist": [
+        {
+          "texto": "Reuniao amanha as 11h com diretora do Entrecot e Cesar",
+          "feito": false
+        },
+        {
+          "texto": "Henrique confirmar horario para sexta com Valdomiro (Table Win)",
+          "feito": false
+        },
+        {
+          "texto": "Enviar relatorio da Naya e link da Peel Beats",
+          "feito": false
+        },
+        {
+          "texto": "Concluir desenho 3D para mostrar na sexta para Raul",
+          "feito": false
+        },
+        {
+          "texto": "Henrique enviar nome da marca para Tarcisio gerar relatorio Naya",
+          "feito": false
+        },
+        {
+          "texto": "Tarcisio gerar e enviar relatorio da Naya",
+          "feito": false
+        }
+      ],
+      "tagsPrincipais": [
+        "1KM",
+        "ABF",
+        "Alice Ninho Limao",
+        "Alten",
+        "B4/BFOR",
+        "Barista Robotico"
+      ],
+      "ordem": 2
+    },
+    {
+      "id": "lava-hub",
+      "nome": "Lava Hub - Franquia de Lavanderia",
+      "descricao": "Franquia de lavanderia autonoma para condominios e vending machines. Roadmap para BEE4. Negociacao de sociedade.",
+      "coluna": "em_andamento",
+      "prioridade": "media",
+      "categoria": "Franquia",
+      "responsavel": "Adamilson",
+      "participantes": [
+        "Adamilson",
+        "Ariel",
+        "Bruno",
+        "Caio",
+        "Camila"
+      ],
+      "totalReunioes": 9,
+      "totalAcoes": 72,
+      "dataInicio": "2025-12-19",
+      "dataUltima": "2026-03-05",
+      "notas": "",
+      "checklist": [
+        {
+          "texto": "Henrique confirmar reuniao com Daniel para sexta-feira, 11h",
+          "feito": false
+        },
+        {
+          "texto": "Felipe visitar a empresa e conversar com Daniel (CEO)",
+          "feito": false
+        },
+        {
+          "texto": "Desenvolver plano detalhado para aumentar faturamento em R$100-200mil/mes",
+          "feito": false
+        },
+        {
+          "texto": "Felipe testar maquinas de vending nas unidades",
+          "feito": false
+        },
+        {
+          "texto": "Avaliar parceria comercial independente de sociedade",
+          "feito": false
+        },
+        {
+          "texto": "Planejar viagem para China em abril",
+          "feito": false
+        }
+      ],
+      "tagsPrincipais": [
+        "ABF",
+        "Ariel",
+        "Automacao",
+        "BFOR",
+        "Barista Robotico",
+        "Brook"
+      ],
+      "ordem": 9
+    },
+    {
+      "id": "longview",
+      "nome": "Longview Global Hub",
+      "descricao": "Venture com FAQ institucional, turismo corporativo, Radar das Viagens, monetizacao de dados, agentes IA.",
+      "coluna": "em_andamento",
+      "prioridade": "media",
+      "categoria": "Plataforma",
+      "responsavel": "Aninha",
+      "participantes": [
+        "Aninha",
+        "Antonia",
+        "Antonio",
+        "Antony",
+        "Bruno"
+      ],
+      "totalReunioes": 9,
+      "totalAcoes": 53,
+      "dataInicio": "2026-01-13",
+      "dataUltima": "2026-01-28",
+      "notas": "",
+      "checklist": [
+        {
+          "texto": "Diego: Apresentar proposta completa para Marcelo sobre a parceria",
+          "feito": false
+        },
+        {
+          "texto": "Diego: Dar feedback apos conversa com Marcelo",
+          "feito": false
+        },
+        {
+          "texto": "Diego: Verificar disponibilidade de Marcelo para reuniao antes do embarque (dia 3) ou em Sao Paulo",
+          "feito": false
+        },
+        {
+          "texto": "Henrique: Enviar apresentacao mais detalhada caso haja proxima reuniao",
+          "feito": false
+        },
+        {
+          "texto": "Henrique: Dar acesso a plataforma Longview para analise",
+          "feito": false
+        },
+        {
+          "texto": "Carol: Compartilhar contato de Henrique com Diego",
+          "feito": false
+        }
+      ],
+      "tagsPrincipais": [
+        "ABF",
+        "AWS",
+        "B4",
+        "CVM",
+        "Canton Fair",
+        "ChatGPT"
+      ],
+      "ordem": 10
+    },
+    {
+      "id": "last-mile",
+      "nome": "Last Mile - Documentario + Livro",
+      "descricao": "Documentario 'The Last Mile' sobre a jornada do Grupo Rao + livro 'Delivery Milionario'. Lancamento em SP.",
+      "coluna": "em_andamento",
+      "prioridade": "media",
+      "categoria": "Conteudo",
+      "responsavel": "Adamilson",
+      "participantes": [
+        "Adamilson",
+        "Antonio",
+        "Ariel",
+        "Beto",
+        "Brunao"
+      ],
+      "totalReunioes": 9,
+      "totalAcoes": 92,
+      "dataInicio": "2026-01-23",
+      "dataUltima": "2026-02-27",
+      "notas": "",
+      "checklist": [
+        {
+          "texto": "Henrique organizar evento no Nolita dia 18/3 para transmissao B4",
+          "feito": false
+        },
+        {
+          "texto": "Juliana focar agenda Sao Paulo (11-16/3): eventos, reunioes, lancamento do livro",
+          "feito": false
+        },
+        {
+          "texto": "Juliana marcar cafe com Danilo da Meituan",
+          "feito": false
+        },
+        {
+          "texto": "Juliana explorar oportunidades de M&A com iFood (Table-in e Naia)",
+          "feito": false
+        },
+        {
+          "texto": "Juliana agendar reuniao com Valdomiro sobre Table-in",
+          "feito": false
+        },
+        {
+          "texto": "Henrique confirmar evento FIRJAN dia 11/3",
+          "feito": false
+        }
+      ],
+      "tagsPrincipais": [
+        "Arca",
+        "B4",
+        "B4 Reality Show",
+        "BFOR",
+        "Bee4",
+        "Brook"
+      ],
+      "ordem": 11
+    },
+    {
+      "id": "purple-party",
+      "nome": "The Purple Party",
+      "descricao": "E-commerce e wholesale. Franquia ABF. Lancamento via Canton Fair e Shenzhen. Expansao para Dubai.",
+      "coluna": "em_andamento",
+      "prioridade": "media",
+      "categoria": "E-commerce",
+      "responsavel": "Camilo",
+      "participantes": [
+        "Camilo",
+        "Cesar",
+        "Guilherme",
+        "Henrique",
+        "Henrique Lemos"
+      ],
+      "totalReunioes": 4,
+      "totalAcoes": 35,
+      "dataInicio": "2025-12-19",
+      "dataUltima": "2026-03-05",
+      "notas": "",
+      "checklist": [
+        {
+          "texto": "Henrique enviar contrato para Mario para formalizacao da parceria",
+          "feito": false
+        },
+        {
+          "texto": "Henrique enviar copia do passaporte para Mario (primeira pagina)",
+          "feito": false
+        },
+        {
+          "texto": "Mario pesquisar melhor localizacao para estrutura empresarial (Dubai, Hong Kong ou China)",
+          "feito": false
+        },
+        {
+          "texto": "Criar grupo WeChat incluindo Henrique, Mario e desenvolvedor",
+          "feito": false
+        },
+        {
+          "texto": "Integrar PDV com RP hoje",
+          "feito": false
+        },
+        {
+          "texto": "Reuniao agendada as 17:00",
+          "feito": false
+        }
+      ],
+      "tagsPrincipais": [
+        "ABF",
+        "Axis Backpack",
+        "Barista Robotico",
+        "Brasil eventos",
+        "CRM",
+        "Canton Fair"
+      ],
+      "ordem": 12
+    },
+    {
+      "id": "pharma-rao",
+      "nome": "Pharma Rao - Delivery de Farmacias",
+      "descricao": "Nova vertical de delivery farmaceutico. Parceria com Record TV. Lancamento estrategico.",
+      "coluna": "planejamento",
+      "prioridade": "media",
+      "categoria": "Nova Vertical",
+      "responsavel": "Adamilson",
+      "participantes": [
+        "Adamilson",
+        "Antonio",
+        "Bruno",
+        "Caio",
+        "Camila"
+      ],
+      "totalReunioes": 4,
+      "totalAcoes": 36,
+      "dataInicio": "2026-01-09",
+      "dataUltima": "2026-03-04",
+      "notas": "",
+      "checklist": [
+        {
+          "texto": "Henrique enviar documentos (acordo de socios, roadmap) para revisao",
+          "feito": false
+        },
+        {
+          "texto": "Henrique ligar para parceiro da LivePag e marcar reuniao sexta-feira as 10h",
+          "feito": false
+        },
+        {
+          "texto": "Henrique comecar participacao em reunioes semanais da equipe",
+          "feito": false
+        },
+        {
+          "texto": "Gabriel D'Abruto preparar release e materiais de divulgacao",
+          "feito": false
+        },
+        {
+          "texto": "Dani testar ferramenta de precificacao e dar feedback",
+          "feito": false
+        },
+        {
+          "texto": "Henrique desenvolver MVP da plataforma Imo",
+          "feito": false
+        }
+      ],
+      "tagsPrincipais": [
+        "ABF",
+        "B4",
+        "BFOR",
+        "CVM",
+        "Canton Fair",
+        "China"
+      ],
+      "ordem": 0
+    },
+    {
+      "id": "go-tesla",
+      "nome": "Go By Tesla",
+      "descricao": "Plataforma de mobilidade premium em Portugal com Teslas. Motoristas, publicidade LED, parceria com hoteis.",
+      "coluna": "planejamento",
+      "prioridade": "media",
+      "categoria": "Mobilidade",
+      "responsavel": "Alexandre Tito",
+      "participantes": [
+        "Alexandre Tito",
+        "Bruno",
+        "Henrique Lemos",
+        "Jaqueline",
+        "Leon"
+      ],
+      "totalReunioes": 2,
+      "totalAcoes": 14,
+      "dataInicio": "2026-01-31",
+      "dataUltima": "2026-02-24",
+      "notas": "",
+      "checklist": [
+        {
+          "texto": "Leon enviar documento sintese (one page) ate 6 de marco",
+          "feito": false
+        },
+        {
+          "texto": "Jaqueline agendar workshop/evento para 11 de marco no CRS a partir das 9h-10h",
+          "feito": false
+        },
+        {
+          "texto": "Tito convidar franqueados e lideres para o evento",
+          "feito": false
+        },
+        {
+          "texto": "Equipe SESI condensar discussoes em documento para alinhamento",
+          "feito": false
+        },
+        {
+          "texto": "Buscar fontes de fomento apos validacao do escopo (EMBRAPI, FINEP, recursos SESI)",
+          "feito": false
+        },
+        {
+          "texto": "Henrique confirmar disponibilidade do desenvolvedor para reuniao na quarta-feira as 9h",
+          "feito": false
+        }
+      ],
+      "tagsPrincipais": [
+        "BRUC",
+        "Foundation Systems",
+        "Go By Tesla",
+        "IA",
+        "NFC",
+        "NotebookLM"
+      ],
+      "ordem": 1
+    }
+  ]
+}
