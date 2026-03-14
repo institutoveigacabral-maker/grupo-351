@@ -98,6 +98,17 @@ model Artigo {
   @@map("artigos")
 }
 
+model AiConversa {
+  id        String   @id @default(cuid())
+  titulo    String
+  resumo    String   @db.Text
+  mensagens Json
+  criadoEm  DateTime @default(now()) @map("criado_em")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("ai_conversas")
+}
+
 model ReuniaoDataset {
   id        String   @id @default(cuid())
   tipo      String   @unique
