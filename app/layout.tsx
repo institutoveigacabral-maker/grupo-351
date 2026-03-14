@@ -1,12 +1,8 @@
 import type { Metadata } from "next";
 import { Inter, Geist } from "next/font/google";
 import "./globals.css";
-import { Nav } from "@/components/Nav";
-import { Footer } from "@/components/Footer";
-import { WhatsAppButton } from "@/components/WhatsAppButton";
-import { CookieConsent } from "@/components/CookieConsent";
-import { ScrollProgress } from "@/components/ScrollProgress";
-import { BackToTop } from "@/components/BackToTop";
+import { JsonLd } from "@/components/JsonLd";
+import { organizationSchema, webSiteSchema } from "@/lib/schema";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -56,31 +52,7 @@ export default function RootLayout({
   return (
     <html lang="pt">
       <head>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "Organization",
-              name: "GRUPO +351",
-              description:
-                "Hub de Negócios e Joint Ventures sediado em Cascais, Portugal.",
-              url: "https://grupo351.com",
-              address: {
-                "@type": "PostalAddress",
-                addressLocality: "Cascais",
-                addressRegion: "Lisboa",
-                addressCountry: "PT",
-              },
-              foundingDate: "2024",
-              founders: [
-                { "@type": "Person", name: "Henrique Lemos" },
-                { "@type": "Person", name: "Fernando Vieira" },
-                { "@type": "Person", name: "Herson Rosa" },
-              ],
-            }),
-          }}
-        />
+        <JsonLd data={[organizationSchema(), webSiteSchema()]} />
       </head>
       <body
         className={`${inter.variable} ${geistSans.variable} antialiased`}

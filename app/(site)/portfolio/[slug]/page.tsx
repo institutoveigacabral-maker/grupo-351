@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getProjetos, getProjetoBySlug } from "@/lib/projetos";
 import { ProjetoPage } from "./ProjetoPage";
+import { JsonLd } from "@/components/JsonLd";
+import { projetoSchema } from "@/lib/schema";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -21,6 +23,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${projeto.name} — GRUPO +351`,
     description: projeto.description,
+    openGraph: {
+      title: `${projeto.name} — GRUPO +351`,
+      description: projeto.tagline || projeto.description,
+      type: "website",
+    },
   };
 }
 
@@ -29,5 +36,10 @@ export default async function ProjetoPageRoute({ params }: Props) {
   const projeto = await getProjetoBySlug(slug);
   if (!projeto) notFound();
 
-  return <ProjetoPage projeto={projeto} />;
+  return (
+    <>
+      <JsonLd data={projetoSchema(projeto)} />
+      <ProjetoPage projeto={projeto} />
+    </>
+  );
 }

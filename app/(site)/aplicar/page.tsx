@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { getProjetos } from "@/lib/projetos";
 import { AplicarPage } from "./AplicarPage";
+import { JsonLd } from "@/components/JsonLd";
+import { aplicarSchema } from "@/lib/schema";
 
 export const metadata: Metadata = {
   title: "Aplicar — GRUPO +351",
@@ -17,5 +19,10 @@ export default async function Aplicar() {
     label: p.name,
     tag: p.tag,
   }));
-  return <AplicarPage modelos={modelos} />;
+  return (
+    <>
+      <JsonLd data={aplicarSchema()} />
+      <AplicarPage modelos={modelos} />
+    </>
+  );
 }

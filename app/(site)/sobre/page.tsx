@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { SobrePage } from "./SobrePage";
+import { JsonLd } from "@/components/JsonLd";
+import { sobreSchema } from "@/lib/schema";
 
 export const metadata: Metadata = {
   title: "Sobre — GRUPO +351",
@@ -8,5 +10,10 @@ export const metadata: Metadata = {
 };
 
 export default function Sobre() {
-  return <SobrePage />;
+  return (
+    <>
+      <JsonLd data={sobreSchema()} />
+      <SobrePage />
+    </>
+  );
 }

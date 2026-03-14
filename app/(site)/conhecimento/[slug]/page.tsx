@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getArtigos, getArtigoBySlug } from "@/lib/conhecimento";
 import { ArtigoPage } from "./ArtigoPage";
+import { JsonLd } from "@/components/JsonLd";
+import { artigoSchema } from "@/lib/schema";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -21,6 +23,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${artigo.titulo} — GRUPO +351`,
     description: artigo.resumo,
+    openGraph: {
+      title: `${artigo.titulo} — GRUPO +351`,
+      description: artigo.resumo,
+      type: "article",
+    },
   };
 }
 
@@ -29,5 +36,10 @@ export default async function ArtigoRoute({ params }: Props) {
   const artigo = await getArtigoBySlug(slug);
   if (!artigo) notFound();
   const allArtigos = await getArtigos();
-  return <ArtigoPage artigo={artigo} allArtigos={allArtigos} />;
+  return (
+    <>
+      <JsonLd data={artigoSchema(artigo)} />
+      <ArtigoPage artigo={artigo} allArtigos={allArtigos} />
+    </>
+  );
 }

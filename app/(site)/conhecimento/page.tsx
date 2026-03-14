@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { getGlossario, getArtigos } from "@/lib/conhecimento";
 import { ConhecimentoPage } from "./ConhecimentoPage";
+import { JsonLd } from "@/components/JsonLd";
+import { conhecimentoListSchema, breadcrumbSchema } from "@/lib/schema";
 
 export const metadata: Metadata = {
   title: "Base de Conhecimento — GRUPO +351",
@@ -15,5 +17,18 @@ export default async function Conhecimento() {
     getGlossario(),
     getArtigos(),
   ]);
-  return <ConhecimentoPage glossario={glossario} artigos={artigos} />;
+  return (
+    <>
+      <JsonLd
+        data={[
+          conhecimentoListSchema(artigos, glossario),
+          breadcrumbSchema([
+            { name: "Home", url: "https://grupo351.com" },
+            { name: "Conhecimento", url: "https://grupo351.com/conhecimento" },
+          ]),
+        ]}
+      />
+      <ConhecimentoPage glossario={glossario} artigos={artigos} />
+    </>
+  );
 }

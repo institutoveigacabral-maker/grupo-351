@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { EcossistemaPage } from "./EcossistemaPage";
+import { JsonLd } from "@/components/JsonLd";
+import { ecossistemaSchema } from "@/lib/schema";
 
 export const metadata: Metadata = {
   title: "Ecossistema FIGITAL — GRUPO +351",
@@ -8,5 +10,10 @@ export const metadata: Metadata = {
 };
 
 export default function Ecossistema() {
-  return <EcossistemaPage />;
+  return (
+    <>
+      <JsonLd data={ecossistemaSchema()} />
+      <EcossistemaPage />
+    </>
+  );
 }

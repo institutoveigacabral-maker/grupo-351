@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { ContatoPage } from "./ContatoPage";
+import { JsonLd } from "@/components/JsonLd";
+import { contatoSchema } from "@/lib/schema";
 
 export const metadata: Metadata = {
   title: "Contato — GRUPO +351",
@@ -8,5 +10,10 @@ export const metadata: Metadata = {
 };
 
 export default function Contato() {
-  return <ContatoPage />;
+  return (
+    <>
+      <JsonLd data={contatoSchema()} />
+      <ContatoPage />
+    </>
+  );
 }
