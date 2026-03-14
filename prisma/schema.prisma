@@ -1,0 +1,108 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model AdminUser {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  nome      String
+  senhaHash String   @map("senha_hash")
+  criadoEm  DateTime @default(now()) @map("criado_em")
+
+  @@map("admin_users")
+}
+
+model Candidatura {
+  id                String   @id @default(cuid())
+  criadoEm          DateTime @default(now()) @map("criado_em")
+  status            String   @default("nova")
+  nome              String
+  email             String
+  telefone          String
+  pais              String
+  cidade            String
+  perfil            String
+  experiencia       String   @db.Text
+  setor             String
+  empresaAtual      String?  @map("empresa_atual")
+  linkedin          String?
+  modelo            String[]
+  capitalDisponivel String   @map("capital_disponivel")
+  prazo             String
+  dedicacao         String
+  motivacao         String   @db.Text
+  diferenciais      String   @db.Text
+  disponibilidade   String?
+  aceitaNDA         Boolean  @default(false) @map("aceita_nda")
+  notas             String?  @db.Text
+  atribuidoA        String?  @map("atribuido_a")
+
+  @@map("candidaturas")
+}
+
+model Contato {
+  id        String   @id @default(cuid())
+  criadoEm  DateTime @default(now()) @map("criado_em")
+  lido      Boolean  @default(false)
+  arquivado Boolean  @default(false)
+  nome      String
+  email     String
+  empresa   String?
+  tipo      String
+  orcamento String?
+  mensagem  String   @db.Text
+  notas     String?  @db.Text
+
+  @@map("contatos")
+}
+
+model Projeto {
+  slug              String    @id
+  name              String
+  tagline           String
+  description       String    @db.Text
+  detalhes          String[]
+  tag               String
+  status            String
+  mercado           String
+  parceiro          String?
+  controle          String
+  icon              String
+  notasInternas     String?   @map("notas_internas") @db.Text
+  ultimaAtualizacao DateTime? @map("ultima_atualizacao")
+
+  @@map("projetos")
+}
+
+model Termo {
+  slug      String @id
+  termo     String
+  definicao String @db.Text
+  categoria String
+
+  @@map("glossario")
+}
+
+model Artigo {
+  slug      String   @id
+  titulo    String
+  resumo    String   @db.Text
+  conteudo  String[]
+  categoria String
+  destaque  Boolean  @default(false)
+
+  @@map("artigos")
+}
+
+model ReuniaoDataset {
+  id        String   @id @default(cuid())
+  tipo      String   @unique
+  data      Json
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("reuniao_datasets")
+}

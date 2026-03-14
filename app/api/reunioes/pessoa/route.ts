@@ -1,12 +1,7 @@
 import { NextResponse } from "next/server";
-import { readFileSync } from "fs";
-import { join } from "path";
+import { getReuniaoDataset } from "@/lib/db";
 
 const SHARE_TOKEN = process.env.REUNIOES_TOKEN || "r351-gov-2026";
-
-function readJSON(name: string) {
-  return JSON.parse(readFileSync(join(process.cwd(), "data", name), "utf-8"));
-}
 
 function slugify(name: string) {
   return name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -21,20 +16,26 @@ export async function GET(request: Request) {
   const slug = searchParams.get("slug");
   if (!slug) return NextResponse.json({ error: "slug required" }, { status: 400 });
 
-  const reunioes = readJSON("reunioes.json");
-  const analise = readJSON("reunioes-analise.json");
-  const roadmaps = readJSON("reunioes-roadmaps.json");
+  const [reunioes, analise, roadmaps] = await Promise.all([
+    getReuniaoDataset("reunioes"),
+    getReuniaoDataset("analise"),
+    getReuniaoDataset("roadmaps"),
+  ]) as [unknown[], Record<string, unknown>, Record<string, unknown>];
+
+  const reunioesArr = reunioes as { titulo: string; data: string; tags?: string[]; acoes?: string[]; participantes?: string[] }[];
+  const analiseTyped = analise as { pessoas?: { nome: string; totalReunioes?: number; primeiraReuniao?: string; ultimaReuniao?: string; temasPrincipais?: string[]; conexoes?: string[] }[]; acoes?: { recentes?: { responsavel: string | null }[] } };
+  const roadmapsTyped = roadmaps as { roadmaps?: { id: string; nome: string; status: string; prioridade: string; totalReunioes: number; categoria: string; participantesChave: string[] }[] };
 
   // Find person in analise
-  const person = (analise.pessoas || []).find((p: { nome: string }) => slugify(p.nome) === slug);
+  const person = (analiseTyped.pessoas || []).find((p) => slugify(p.nome) === slug);
 
   // Find all meetings this person participated in
-  const meetings = reunioes.filter((r: { participantes?: string[] }) =>
+  const meetings = reunioesArr.filter((r) =>
     (r.participantes || []).some((p: string) => {
       const clean = p.replace(/\s*\(.*?\)\s*/g, "").trim();
       return slugify(clean) === slug;
     })
-  ).map((r: { titulo: string; data: string; tags?: string[]; acoes?: string[]; participantes?: string[] }) => ({
+  ).map((r) => ({
     titulo: r.titulo,
     data: r.data,
     tags: (r.tags || []).slice(0, 5),
@@ -43,9 +44,9 @@ export async function GET(request: Request) {
   }));
 
   // Find roadmaps involving this person
-  const relatedProjects = (roadmaps.roadmaps || []).filter((rm: { participantesChave: string[] }) =>
+  const relatedProjects = (roadmapsTyped.roadmaps || []).filter((rm) =>
     (rm.participantesChave || []).some((p: string) => slugify(p) === slug)
-  ).map((rm: { id: string; nome: string; status: string; prioridade: string; totalReunioes: number; categoria: string }) => ({
+  ).map((rm) => ({
     id: rm.id,
     nome: rm.nome,
     status: rm.status,
@@ -55,7 +56,7 @@ export async function GET(request: Request) {
   }));
 
   // Actions attributed to this person
-  const actions = (analise.acoes?.recentes || []).filter((a: { responsavel: string | null }) =>
+  const actions = (analiseTyped.acoes?.recentes || []).filter((a) =>
     a.responsavel && slugify(a.responsavel) === slug
   ).slice(0, 15);
 

@@ -1,12 +1,7 @@
 import { NextResponse } from "next/server";
-import { readFileSync } from "fs";
-import { join } from "path";
+import { getReuniaoDataset } from "@/lib/db";
 
 const SHARE_TOKEN = process.env.REUNIOES_TOKEN || "r351-gov-2026";
-
-function readJSON(name: string) {
-  return JSON.parse(readFileSync(join(process.cwd(), "data", name), "utf-8"));
-}
 
 function daysSince(dateStr: string) {
   return Math.floor((Date.now() - new Date(dateStr + "T12:00:00").getTime()) / 86400000);
@@ -30,13 +25,16 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Token invalido" }, { status: 401 });
   }
 
-  const reunioes = readJSON("reunioes.json");
-  const analise = readJSON("reunioes-analise.json");
-  const roadmaps = readJSON("reunioes-roadmaps.json");
-  const kanban = readJSON("reunioes-kanban.json");
+  const [reunioes, analise, roadmaps, kanban] = await Promise.all([
+    getReuniaoDataset("reunioes"),
+    getReuniaoDataset("analise"),
+    getReuniaoDataset("roadmaps"),
+    getReuniaoDataset("kanban"),
+  ]) as [unknown[], Record<string, unknown>, Record<string, unknown>, Record<string, unknown>];
 
   // Build project portfolio with health scores
-  const projects = kanban.cards.map((card: Record<string, unknown>) => {
+  const cards = (kanban.cards as Record<string, unknown>[]) || [];
+  const projects = cards.map((card) => {
     const checklist = (card.checklist as { feito: boolean }[]) || [];
     const checkDone = checklist.filter((c) => c.feito).length;
     const checkTotal = checklist.length;
@@ -70,31 +68,33 @@ export async function GET(request: Request) {
   const alerts: { tipo: string; titulo: string; descricao: string; link: string; cor: string }[] = [];
 
   // Critical projects inactive
-  projects.forEach((p: Record<string, unknown>) => {
+  projects.forEach((p) => {
     if (p.prioridade === "critica" && daysSince(p.dataUltima as string) > 7) {
       alerts.push({ tipo: "risco", titulo: `${p.nome} sem atividade`, descricao: `Prioridade critica, ${daysSince(p.dataUltima as string)} dias sem reuniao`, link: `/reunioes/kanban`, cor: "red" });
     }
   });
 
   // Low health projects
-  projects.forEach((p: Record<string, unknown>) => {
+  projects.forEach((p) => {
     if ((p.health as number) < 40 && p.prioridade !== "baixa") {
       alerts.push({ tipo: "atencao", titulo: `${p.nome} (score ${p.health})`, descricao: `Saude baixa — verificar progresso`, link: `/reunioes/roadmaps`, cor: "amber" });
     }
   });
 
   // Recurring discussions
-  const recurring = (analise.insights?.discussoesRecorrentes || []).filter((d: { vezes: number }) => d.vezes >= 6).slice(0, 3);
-  recurring.forEach((d: { tema: string; vezes: number; dias: number }) => {
+  const analiseTyped = analise as { insights?: { discussoesRecorrentes?: { tema: string; vezes: number; dias: number }[]; temasEmergentes?: unknown[] }; acoes?: { total?: number; recentes?: unknown[] }; pessoas?: unknown[] };
+  const recurring = (analiseTyped.insights?.discussoesRecorrentes || []).filter((d) => d.vezes >= 6).slice(0, 3);
+  recurring.forEach((d) => {
     alerts.push({ tipo: "decisao", titulo: `"${d.tema}" discutido ${d.vezes}x`, descricao: `${d.dias} dias sem resolucao aparente`, link: `/reunioes/inteligencia`, cor: "violet" });
   });
 
   // Recent meetings (last 7 days)
-  const recentMeetings = reunioes.filter((r: { data: string }) => daysSince(r.data) <= 7).slice(0, 8);
+  const reunioesArr = reunioes as { data: string; participantes?: string[] }[];
+  const recentMeetings = reunioesArr.filter((r) => daysSince(r.data) <= 7).slice(0, 8);
 
   // Top people (last 30 days)
   const peopleLast30: Record<string, number> = {};
-  reunioes.filter((r: { data: string }) => daysSince(r.data) <= 30).forEach((r: { participantes?: string[] }) => {
+  reunioesArr.filter((r) => daysSince(r.data) <= 30).forEach((r) => {
     (r.participantes || []).forEach((p: string) => {
       const name = p.replace(/\s*\(.*?\)\s*/g, "").trim();
       if (name.length > 1) peopleLast30[name] = (peopleLast30[name] || 0) + 1;
@@ -103,12 +103,13 @@ export async function GET(request: Request) {
   const activePeople = Object.entries(peopleLast30).sort((a, b) => b[1] - a[1]).slice(0, 12).map(([nome, count]) => ({ nome, count }));
 
   // Emerging topics
-  const emerging = (analise.insights?.temasEmergentes || []).slice(0, 6);
+  const emerging = (analiseTyped.insights?.temasEmergentes || []).slice(0, 6);
 
   // Next actions across all roadmaps
+  const roadmapsTyped = roadmaps as { roadmaps?: { nome: string; proximosPassos: { acao: string; data: string }[] }[] };
   const nextActions: { acao: string; projeto: string; data: string }[] = [];
-  (roadmaps.roadmaps || []).forEach((rm: { nome: string; proximosPassos: { acao: string; data: string }[] }) => {
-    (rm.proximosPassos || []).slice(0, 3).forEach((ps: { acao: string; data: string }) => {
+  (roadmapsTyped.roadmaps || []).forEach((rm) => {
+    (rm.proximosPassos || []).slice(0, 3).forEach((ps) => {
       nextActions.push({ acao: ps.acao, projeto: rm.nome, data: ps.data });
     });
   });
@@ -116,15 +117,15 @@ export async function GET(request: Request) {
 
   // Column distribution
   const colDist: Record<string, number> = {};
-  projects.forEach((p: Record<string, unknown>) => {
+  projects.forEach((p) => {
     colDist[p.coluna as string] = (colDist[p.coluna as string] || 0) + 1;
   });
 
   return NextResponse.json({
-    totalReunioes: reunioes.length,
+    totalReunioes: reunioesArr.length,
     totalProjetos: projects.length,
-    totalAcoes: analise.acoes?.total || 0,
-    totalPessoas: analise.pessoas?.length || 0,
+    totalAcoes: analiseTyped.acoes?.total || 0,
+    totalPessoas: analiseTyped.pessoas?.length || 0,
     projects,
     alerts: alerts.slice(0, 6),
     recentMeetings,

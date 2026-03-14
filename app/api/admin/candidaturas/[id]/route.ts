@@ -7,7 +7,7 @@ interface Props {
 
 export async function GET(_req: Request, { params }: Props) {
   const { id } = await params;
-  const item = getCandidaturaById(id);
+  const item = await getCandidaturaById(id);
   if (!item) return NextResponse.json({ error: "Não encontrada" }, { status: 404 });
   return NextResponse.json(item);
 }

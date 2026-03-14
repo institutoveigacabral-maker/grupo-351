@@ -10,8 +10,8 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
-export default function Aplicar() {
-  const projetos = getProjetos();
+export default async function Aplicar() {
+  const projetos = await getProjetos();
   const modelos = projetos.map((p) => ({
     value: p.slug,
     label: p.name,

@@ -5,11 +5,13 @@ import { getGlossario, getArtigos } from "@/lib/conhecimento";
 import type { DashboardStats } from "@/lib/admin-types";
 
 export async function GET() {
-  const candidaturas = getCandidaturas();
-  const contatos = getContatos();
-  const allProjetos = getProjetos();
-  const glossario = getGlossario();
-  const artigos = getArtigos();
+  const [candidaturas, contatos, allProjetos, glossario, artigos] = await Promise.all([
+    getCandidaturas(),
+    getContatos(),
+    getProjetos(),
+    getGlossario(),
+    getArtigos(),
+  ]);
 
   const stats: DashboardStats = {
     candidaturas: {

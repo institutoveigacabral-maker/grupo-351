@@ -1,9 +1,7 @@
 import { NextResponse } from "next/server";
-import { readFileSync } from "fs";
-import { join } from "path";
+import { getReuniaoDataset } from "@/lib/db";
 
 export async function GET() {
-  const filepath = join(process.cwd(), "data", "reunioes.json");
-  const raw = readFileSync(filepath, "utf-8");
-  return NextResponse.json(JSON.parse(raw));
+  const data = await getReuniaoDataset("reunioes");
+  return NextResponse.json(data);
 }

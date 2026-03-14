@@ -2,12 +2,14 @@ import { getProjetos } from "./projetos";
 import { getCandidaturas, getContatos } from "./db";
 import { getGlossario, getArtigos } from "./conhecimento";
 
-export function buildSystemPrompt(): string {
-  const projetos = getProjetos();
-  const candidaturas = getCandidaturas();
-  const contatos = getContatos();
-  const glossario = getGlossario();
-  const artigos = getArtigos();
+export async function buildSystemPrompt(): Promise<string> {
+  const [projetos, candidaturas, contatos, glossario, artigos] = await Promise.all([
+    getProjetos(),
+    getCandidaturas(),
+    getContatos(),
+    getGlossario(),
+    getArtigos(),
+  ]);
 
   const projetosCtx = projetos.map((p) =>
     `- **${p.name}** (${p.slug}): ${p.tagline}. Status: ${p.status}. Mercado: ${p.mercado}. Controle: ${p.controle}. ${p.parceiro ? `Parceiro: ${p.parceiro}.` : ""} Tag: ${p.tag}. Detalhes: ${p.detalhes.join("; ")}`

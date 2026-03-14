@@ -2,11 +2,13 @@ import type { MetadataRoute } from "next";
 import { getProjetos } from "@/lib/projetos";
 import { getArtigos } from "@/lib/conhecimento";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = "https://grupo351.com";
   const now = new Date();
 
-  const projetoUrls = getProjetos().map((p) => ({
+  const [projetos, artigos] = await Promise.all([getProjetos(), getArtigos()]);
+
+  const projetoUrls = projetos.map((p) => ({
     url: `${base}/portfolio/${p.slug}`,
     lastModified: now,
     changeFrequency: "monthly" as const,
@@ -57,7 +59,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly",
       priority: 0.8,
     },
-    ...getArtigos().map((a) => ({
+    ...artigos.map((a) => ({
       url: `${base}/conhecimento/${a.slug}`,
       lastModified: now,
       changeFrequency: "monthly" as const,

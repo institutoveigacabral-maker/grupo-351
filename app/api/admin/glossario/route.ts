@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getGlossarioDb, addTermo, updateTermo, deleteTermo } from "@/lib/db";
 
 export async function GET() {
-  return NextResponse.json(getGlossarioDb());
+  return NextResponse.json(await getGlossarioDb());
 }
 
 export async function POST(request: Request) {

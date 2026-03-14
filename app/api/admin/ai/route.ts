@@ -1,9 +1,20 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { buildSystemPrompt } from "@/lib/ai-context";
+import { aiMessagesSchema } from "@/lib/validations";
+import { rateLimit, getClientIP } from "@/lib/rate-limit";
 
 const client = new Anthropic();
 
 export async function POST(request: Request) {
+  const ip = getClientIP(request);
+  const rl = rateLimit(`ai:${ip}`, { limit: 10, windowMs: 60_000 });
+  if (!rl.success) {
+    return new Response(
+      JSON.stringify({ error: "Limite de requisições atingido. Aguarde 1 minuto." }),
+      { status: 429, headers: { "Content-Type": "application/json" } }
+    );
+  }
+
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     return new Response(
@@ -12,21 +23,23 @@ export async function POST(request: Request) {
     );
   }
 
-  const { messages } = await request.json();
-  if (!messages || !Array.isArray(messages)) {
+  const body = await request.json();
+  const parsed = aiMessagesSchema.safeParse(body);
+  if (!parsed.success) {
     return new Response(
-      JSON.stringify({ error: "Messages obrigatórias" }),
+      JSON.stringify({ error: "Dados inválidos", details: parsed.error.flatten() }),
       { status: 400, headers: { "Content-Type": "application/json" } }
     );
   }
 
-  const systemPrompt = buildSystemPrompt();
+  const { messages } = parsed.data;
+  const systemPrompt = await buildSystemPrompt();
 
   const stream = client.messages.stream({
     model: "claude-sonnet-4-20250514",
     max_tokens: 4096,
     system: systemPrompt,
-    messages: messages.map((m: { role: string; content: string }) => ({
+    messages: messages.map((m) => ({
       role: m.role as "user" | "assistant",
       content: m.content,
     })),

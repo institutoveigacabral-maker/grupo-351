@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { readFileSync } from "fs";
-import { join } from "path";
+import { getReuniaoDataset } from "@/lib/db";
 
 const SHARE_TOKEN = process.env.REUNIOES_TOKEN || "r351-gov-2026";
 
@@ -12,7 +11,6 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Token invalido" }, { status: 401 });
   }
 
-  const filepath = join(process.cwd(), "data", "reunioes-analise.json");
-  const raw = readFileSync(filepath, "utf-8");
-  return NextResponse.json(JSON.parse(raw));
+  const data = await getReuniaoDataset("analise");
+  return NextResponse.json(data);
 }

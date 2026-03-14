@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const ADMIN_SECRET = process.env.ADMIN_SECRET || "k7x9m2p4w6q8r3t5v1n0j8h6f4d2s0a";
+const ADMIN_SECRET = process.env.ADMIN_SECRET;
 
 async function hmacSHA256(message: string, secret: string): Promise<string> {
   const enc = new TextEncoder();
@@ -19,6 +19,7 @@ async function hmacSHA256(message: string, secret: string): Promise<string> {
 }
 
 async function verifyToken(token: string): Promise<boolean> {
+  if (!ADMIN_SECRET) return false;
   const parts = token.split(":");
   if (parts.length !== 4) return false;
   const [role, nome, expiresStr, signature] = parts;

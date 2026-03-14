@@ -1,5 +1,4 @@
-import { readFileSync, existsSync } from "fs";
-import { join } from "path";
+import { prisma } from "./prisma";
 
 export interface Projeto {
   slug: string;
@@ -17,16 +16,32 @@ export interface Projeto {
   ultimaAtualizacao?: string;
 }
 
-const DATA_PATH = join(process.cwd(), "data", "projetos.json");
-
-export function getProjetos(): Projeto[] {
-  if (!existsSync(DATA_PATH)) return [];
-  const raw = readFileSync(DATA_PATH, "utf-8");
-  return JSON.parse(raw) as Projeto[];
+function mapRow(row: Record<string, unknown>): Projeto {
+  return {
+    slug: row.slug as string,
+    name: row.name as string,
+    tagline: row.tagline as string,
+    description: row.description as string,
+    detalhes: row.detalhes as string[],
+    tag: row.tag as string,
+    status: row.status as Projeto["status"],
+    mercado: row.mercado as string,
+    parceiro: (row.parceiro as string) || undefined,
+    controle: row.controle as string,
+    icon: row.icon as string,
+    notasInternas: (row.notasInternas as string) || undefined,
+    ultimaAtualizacao: row.ultimaAtualizacao
+      ? (row.ultimaAtualizacao as Date).toISOString()
+      : undefined,
+  };
 }
 
-export const projetos: Projeto[] = getProjetos();
+export async function getProjetos(): Promise<Projeto[]> {
+  const rows = await prisma.projeto.findMany();
+  return rows.map(mapRow);
+}
 
-export function getProjetoBySlug(slug: string): Projeto | undefined {
-  return getProjetos().find((p) => p.slug === slug);
+export async function getProjetoBySlug(slug: string): Promise<Projeto | undefined> {
+  const row = await prisma.projeto.findUnique({ where: { slug } });
+  return row ? mapRow(row) : undefined;
 }

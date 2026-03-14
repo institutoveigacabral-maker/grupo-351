@@ -10,12 +10,13 @@ interface Props {
 export const dynamic = "force-dynamic";
 
 export async function generateStaticParams() {
-  return getProjetos().map((p) => ({ slug: p.slug }));
+  const projetos = await getProjetos();
+  return projetos.map((p) => ({ slug: p.slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const projeto = getProjetoBySlug(slug);
+  const projeto = await getProjetoBySlug(slug);
   if (!projeto) return {};
   return {
     title: `${projeto.name} — GRUPO +351`,
@@ -25,7 +26,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ProjetoPageRoute({ params }: Props) {
   const { slug } = await params;
-  const projeto = getProjetoBySlug(slug);
+  const projeto = await getProjetoBySlug(slug);
   if (!projeto) notFound();
 
   return <ProjetoPage projeto={projeto} />;

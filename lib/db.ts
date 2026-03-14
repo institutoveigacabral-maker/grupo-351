@@ -1,261 +1,307 @@
-import { readFileSync, writeFileSync, existsSync } from "fs";
-import { join } from "path";
+import { prisma } from "./prisma";
 import type { Candidatura, Contato } from "./admin-types";
 import type { Projeto } from "./projetos";
 import type { Termo, Artigo } from "./conhecimento-types";
 
-const DATA_DIR = join(process.cwd(), "data");
-
-let writeLock = Promise.resolve();
-
-function ensureFile(filename: string) {
-  const filepath = join(DATA_DIR, filename);
-  if (!existsSync(filepath)) {
-    writeFileSync(filepath, "[]", "utf-8");
-  }
-  return filepath;
-}
-
-function readJSON<T>(filename: string): T[] {
-  const filepath = ensureFile(filename);
-  const raw = readFileSync(filepath, "utf-8");
-  return JSON.parse(raw) as T[];
-}
-
-function writeJSON<T>(filename: string, data: T[]): void {
-  const filepath = ensureFile(filename);
-  writeFileSync(filepath, JSON.stringify(data, null, 2), "utf-8");
-}
-
-async function withLock<T>(fn: () => T): Promise<T> {
-  const prev = writeLock;
-  let resolve: () => void;
-  writeLock = new Promise<void>((r) => {
-    resolve = r;
-  });
-  await prev;
-  try {
-    return fn();
-  } finally {
-    resolve!();
-  }
-}
-
 /* ─── Candidaturas ─── */
 
-export function getCandidaturas(): Candidatura[] {
-  return readJSON<Candidatura>("candidaturas.json").sort(
-    (a, b) => new Date(b.criadoEm).getTime() - new Date(a.criadoEm).getTime()
-  );
+export async function getCandidaturas(): Promise<Candidatura[]> {
+  const rows = await prisma.candidatura.findMany({
+    orderBy: { criadoEm: "desc" },
+  });
+  return rows.map(mapCandidatura);
 }
 
 export async function addCandidatura(
   data: Omit<Candidatura, "id" | "criadoEm" | "status">
 ): Promise<Candidatura> {
-  return withLock(() => {
-    const all = readJSON<Candidatura>("candidaturas.json");
-    const entry: Candidatura = {
-      ...data,
-      id: crypto.randomUUID(),
-      criadoEm: new Date().toISOString(),
+  const row = await prisma.candidatura.create({
+    data: {
+      nome: data.nome,
+      email: data.email,
+      telefone: data.telefone,
+      pais: data.pais,
+      cidade: data.cidade,
+      perfil: data.perfil,
+      experiencia: data.experiencia,
+      setor: data.setor,
+      empresaAtual: data.empresaAtual || null,
+      linkedin: data.linkedin || null,
+      modelo: data.modelo,
+      capitalDisponivel: data.capitalDisponivel,
+      prazo: data.prazo,
+      dedicacao: data.dedicacao,
+      motivacao: data.motivacao,
+      diferenciais: data.diferenciais,
+      disponibilidade: data.disponibilidade || null,
+      aceitaNDA: data.aceitaNDA,
       status: "nova",
-    };
-    all.push(entry);
-    writeJSON("candidaturas.json", all);
-    return entry;
+    },
   });
+  return mapCandidatura(row);
 }
 
 export async function updateCandidatura(
   id: string,
   updates: Partial<Candidatura>
 ): Promise<Candidatura | null> {
-  return withLock(() => {
-    const all = readJSON<Candidatura>("candidaturas.json");
-    const idx = all.findIndex((c) => c.id === id);
-    if (idx === -1) return null;
-    all[idx] = { ...all[idx], ...updates, id: all[idx].id, criadoEm: all[idx].criadoEm };
-    writeJSON("candidaturas.json", all);
-    return all[idx];
-  });
+  try {
+    const { id: _id, criadoEm: _c, ...safe } = updates;
+    const row = await prisma.candidatura.update({
+      where: { id },
+      data: safe,
+    });
+    return mapCandidatura(row);
+  } catch {
+    return null;
+  }
 }
 
-export function getCandidaturaById(id: string): Candidatura | undefined {
-  return readJSON<Candidatura>("candidaturas.json").find((c) => c.id === id);
+export async function getCandidaturaById(id: string): Promise<Candidatura | undefined> {
+  const row = await prisma.candidatura.findUnique({ where: { id } });
+  return row ? mapCandidatura(row) : undefined;
+}
+
+function mapCandidatura(row: Record<string, unknown>): Candidatura {
+  return {
+    id: row.id as string,
+    criadoEm: (row.criadoEm as Date).toISOString(),
+    status: row.status as Candidatura["status"],
+    nome: row.nome as string,
+    email: row.email as string,
+    telefone: row.telefone as string,
+    pais: row.pais as string,
+    cidade: row.cidade as string,
+    perfil: row.perfil as Candidatura["perfil"],
+    experiencia: row.experiencia as string,
+    setor: row.setor as string,
+    empresaAtual: (row.empresaAtual as string) || undefined,
+    linkedin: (row.linkedin as string) || undefined,
+    modelo: row.modelo as string[],
+    capitalDisponivel: row.capitalDisponivel as string,
+    prazo: row.prazo as string,
+    dedicacao: row.dedicacao as string,
+    motivacao: row.motivacao as string,
+    diferenciais: row.diferenciais as string,
+    disponibilidade: (row.disponibilidade as string) || undefined,
+    aceitaNDA: row.aceitaNDA as boolean,
+    notas: (row.notas as string) || undefined,
+    atribuidoA: (row.atribuidoA as string) || undefined,
+  };
 }
 
 /* ─── Contatos ─── */
 
-export function getContatos(): Contato[] {
-  return readJSON<Contato>("contatos.json").sort(
-    (a, b) => new Date(b.criadoEm).getTime() - new Date(a.criadoEm).getTime()
-  );
+export async function getContatos(): Promise<Contato[]> {
+  const rows = await prisma.contato.findMany({
+    orderBy: { criadoEm: "desc" },
+  });
+  return rows.map(mapContato);
 }
 
 export async function addContato(
   data: Omit<Contato, "id" | "criadoEm" | "lido" | "arquivado">
 ): Promise<Contato> {
-  return withLock(() => {
-    const all = readJSON<Contato>("contatos.json");
-    const entry: Contato = {
-      ...data,
-      id: crypto.randomUUID(),
-      criadoEm: new Date().toISOString(),
+  const row = await prisma.contato.create({
+    data: {
+      nome: data.nome,
+      email: data.email,
+      empresa: data.empresa || null,
+      tipo: data.tipo,
+      orcamento: data.orcamento || null,
+      mensagem: data.mensagem,
       lido: false,
       arquivado: false,
-    };
-    all.push(entry);
-    writeJSON("contatos.json", all);
-    return entry;
+    },
   });
+  return mapContato(row);
 }
 
 export async function updateContato(
   id: string,
   updates: Partial<Contato>
 ): Promise<Contato | null> {
-  return withLock(() => {
-    const all = readJSON<Contato>("contatos.json");
-    const idx = all.findIndex((c) => c.id === id);
-    if (idx === -1) return null;
-    all[idx] = { ...all[idx], ...updates, id: all[idx].id, criadoEm: all[idx].criadoEm };
-    writeJSON("contatos.json", all);
-    return all[idx];
-  });
+  try {
+    const { id: _id, criadoEm: _c, ...safe } = updates;
+    const row = await prisma.contato.update({
+      where: { id },
+      data: safe,
+    });
+    return mapContato(row);
+  } catch {
+    return null;
+  }
+}
+
+function mapContato(row: Record<string, unknown>): Contato {
+  return {
+    id: row.id as string,
+    criadoEm: (row.criadoEm as Date).toISOString(),
+    lido: row.lido as boolean,
+    arquivado: row.arquivado as boolean,
+    nome: row.nome as string,
+    email: row.email as string,
+    empresa: (row.empresa as string) || undefined,
+    tipo: row.tipo as string,
+    orcamento: (row.orcamento as string) || undefined,
+    mensagem: row.mensagem as string,
+    notas: (row.notas as string) || undefined,
+  };
 }
 
 /* ─── Projetos ─── */
 
-export function getProjetos(): Projeto[] {
-  return readJSON<Projeto>("projetos.json");
+export async function getProjetos(): Promise<Projeto[]> {
+  const rows = await prisma.projeto.findMany();
+  return rows.map(mapProjeto);
 }
 
-export function getProjetoBySlug(slug: string): Projeto | undefined {
-  return getProjetos().find((p) => p.slug === slug);
+export async function getProjetoBySlug(slug: string): Promise<Projeto | undefined> {
+  const row = await prisma.projeto.findUnique({ where: { slug } });
+  return row ? mapProjeto(row) : undefined;
 }
 
 export async function addProjeto(data: Projeto): Promise<Projeto> {
-  return withLock(() => {
-    const all = readJSON<Projeto>("projetos.json");
-    if (all.some((p) => p.slug === data.slug)) {
-      throw new Error("Slug já existe");
-    }
-    const entry: Projeto = {
-      ...data,
-      ultimaAtualizacao: new Date().toISOString(),
-    };
-    all.push(entry);
-    writeJSON("projetos.json", all);
-    return entry;
+  const row = await prisma.projeto.create({
+    data: {
+      slug: data.slug,
+      name: data.name,
+      tagline: data.tagline,
+      description: data.description,
+      detalhes: data.detalhes,
+      tag: data.tag,
+      status: data.status,
+      mercado: data.mercado,
+      parceiro: data.parceiro || null,
+      controle: data.controle,
+      icon: data.icon,
+      notasInternas: data.notasInternas || null,
+      ultimaAtualizacao: new Date(),
+    },
   });
+  return mapProjeto(row);
 }
 
 export async function updateProjeto(
   slug: string,
   updates: Partial<Projeto>
 ): Promise<Projeto | null> {
-  return withLock(() => {
-    const all = readJSON<Projeto>("projetos.json");
-    const idx = all.findIndex((p) => p.slug === slug);
-    if (idx === -1) return null;
-    all[idx] = {
-      ...all[idx],
-      ...updates,
-      slug: updates.slug || slug,
-      ultimaAtualizacao: new Date().toISOString(),
-    };
-    writeJSON("projetos.json", all);
-    return all[idx];
-  });
+  try {
+    const row = await prisma.projeto.update({
+      where: { slug },
+      data: {
+        ...updates,
+        ultimaAtualizacao: new Date(),
+      },
+    });
+    return mapProjeto(row);
+  } catch {
+    return null;
+  }
 }
 
 export async function deleteProjeto(slug: string): Promise<boolean> {
-  return withLock(() => {
-    const all = readJSON<Projeto>("projetos.json");
-    const idx = all.findIndex((p) => p.slug === slug);
-    if (idx === -1) return false;
-    all.splice(idx, 1);
-    writeJSON("projetos.json", all);
+  try {
+    await prisma.projeto.delete({ where: { slug } });
     return true;
-  });
+  } catch {
+    return false;
+  }
+}
+
+function mapProjeto(row: Record<string, unknown>): Projeto {
+  return {
+    slug: row.slug as string,
+    name: row.name as string,
+    tagline: row.tagline as string,
+    description: row.description as string,
+    detalhes: row.detalhes as string[],
+    tag: row.tag as string,
+    status: row.status as Projeto["status"],
+    mercado: row.mercado as string,
+    parceiro: (row.parceiro as string) || undefined,
+    controle: row.controle as string,
+    icon: row.icon as string,
+    notasInternas: (row.notasInternas as string) || undefined,
+    ultimaAtualizacao: row.ultimaAtualizacao
+      ? (row.ultimaAtualizacao as Date).toISOString()
+      : undefined,
+  };
 }
 
 /* ─── Glossário ─── */
 
-export function getGlossarioDb(): Termo[] {
-  return readJSON<Termo>("glossario.json");
+export async function getGlossarioDb(): Promise<Termo[]> {
+  return prisma.termo.findMany() as unknown as Promise<Termo[]>;
 }
 
 export async function addTermo(data: Termo): Promise<Termo> {
-  return withLock(() => {
-    const all = readJSON<Termo>("glossario.json");
-    if (all.some((t) => t.slug === data.slug)) {
-      throw new Error("Slug já existe");
-    }
-    all.push(data);
-    writeJSON("glossario.json", all);
-    return data;
-  });
+  return prisma.termo.create({ data }) as unknown as Promise<Termo>;
 }
 
 export async function updateTermo(slug: string, updates: Partial<Termo>): Promise<Termo | null> {
-  return withLock(() => {
-    const all = readJSON<Termo>("glossario.json");
-    const idx = all.findIndex((t) => t.slug === slug);
-    if (idx === -1) return null;
-    all[idx] = { ...all[idx], ...updates, slug: updates.slug || slug };
-    writeJSON("glossario.json", all);
-    return all[idx];
-  });
+  try {
+    return (await prisma.termo.update({
+      where: { slug },
+      data: updates,
+    })) as unknown as Termo;
+  } catch {
+    return null;
+  }
 }
 
 export async function deleteTermo(slug: string): Promise<boolean> {
-  return withLock(() => {
-    const all = readJSON<Termo>("glossario.json");
-    const idx = all.findIndex((t) => t.slug === slug);
-    if (idx === -1) return false;
-    all.splice(idx, 1);
-    writeJSON("glossario.json", all);
+  try {
+    await prisma.termo.delete({ where: { slug } });
     return true;
-  });
+  } catch {
+    return false;
+  }
 }
 
 /* ─── Artigos ─── */
 
-export function getArtigosDb(): Artigo[] {
-  return readJSON<Artigo>("artigos.json");
+export async function getArtigosDb(): Promise<Artigo[]> {
+  return prisma.artigo.findMany() as unknown as Promise<Artigo[]>;
 }
 
 export async function addArtigo(data: Artigo): Promise<Artigo> {
-  return withLock(() => {
-    const all = readJSON<Artigo>("artigos.json");
-    if (all.some((a) => a.slug === data.slug)) {
-      throw new Error("Slug já existe");
-    }
-    all.push(data);
-    writeJSON("artigos.json", all);
-    return data;
-  });
+  return prisma.artigo.create({ data }) as unknown as Promise<Artigo>;
 }
 
 export async function updateArtigo(slug: string, updates: Partial<Artigo>): Promise<Artigo | null> {
-  return withLock(() => {
-    const all = readJSON<Artigo>("artigos.json");
-    const idx = all.findIndex((a) => a.slug === slug);
-    if (idx === -1) return null;
-    all[idx] = { ...all[idx], ...updates, slug: updates.slug || slug };
-    writeJSON("artigos.json", all);
-    return all[idx];
-  });
+  try {
+    return (await prisma.artigo.update({
+      where: { slug },
+      data: updates,
+    })) as unknown as Artigo;
+  } catch {
+    return null;
+  }
 }
 
 export async function deleteArtigo(slug: string): Promise<boolean> {
-  return withLock(() => {
-    const all = readJSON<Artigo>("artigos.json");
-    const idx = all.findIndex((a) => a.slug === slug);
-    if (idx === -1) return false;
-    all.splice(idx, 1);
-    writeJSON("artigos.json", all);
+  try {
+    await prisma.artigo.delete({ where: { slug } });
     return true;
+  } catch {
+    return false;
+  }
+}
+
+/* ─── Reunioes Datasets (JSONB) ─── */
+
+export async function getReuniaoDataset(tipo: string): Promise<unknown> {
+  const row = await prisma.reuniaoDataset.findUnique({ where: { tipo } });
+  return row?.data ?? null;
+}
+
+export async function upsertReuniaoDataset(tipo: string, data: unknown): Promise<void> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const jsonData = data as any;
+  await prisma.reuniaoDataset.upsert({
+    where: { tipo },
+    update: { data: jsonData },
+    create: { tipo, data: jsonData },
   });
 }

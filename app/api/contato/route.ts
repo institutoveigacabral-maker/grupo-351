@@ -1,23 +1,32 @@
 import { NextResponse } from "next/server";
 import { addCandidatura, addContato } from "@/lib/db";
 import { notify } from "@/lib/notify";
+import { candidaturaCreateSchema, contatoCreateSchema } from "@/lib/validations";
+import { rateLimit, getClientIP } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
   try {
+    const ip = getClientIP(request);
+    const rl = rateLimit(`contato:${ip}`, { limit: 5, windowMs: 60_000 });
+    if (!rl.success) {
+      return NextResponse.json({ error: "Muitas tentativas. Aguarde 1 minuto." }, { status: 429 });
+    }
+
     const body = await request.json();
 
     // Candidatura JV (vem do /aplicar)
     if (body.tipo === "aplicacao-jv") {
+      const parsed = candidaturaCreateSchema.safeParse(body);
+      if (!parsed.success) {
+        return NextResponse.json({ error: "Campos obrigatórios faltando", details: parsed.error.flatten() }, { status: 400 });
+      }
+
       const {
         nome, email, telefone, pais, cidade, perfil,
         experiencia, setor, empresaAtual, linkedin,
         modelo, capitalDisponivel, prazo, dedicacao,
         motivacao, diferenciais, disponibilidade, aceitaNDA,
-      } = body;
-
-      if (!nome || !email) {
-        return NextResponse.json({ error: "Campos obrigatórios faltando" }, { status: 400 });
-      }
+      } = parsed.data;
 
       await addCandidatura({
         nome, email, telefone, pais, cidade, perfil,
@@ -39,11 +48,12 @@ export async function POST(request: Request) {
     }
 
     // Contato genérico (vem do /contato)
-    const { nome, email, empresa, tipo, orcamento, mensagem } = body;
-
-    if (!nome || !email || !tipo || !mensagem) {
-      return NextResponse.json({ error: "Campos obrigatórios faltando" }, { status: 400 });
+    const parsed = contatoCreateSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Campos obrigatórios faltando", details: parsed.error.flatten() }, { status: 400 });
     }
+
+    const { nome, email, empresa, tipo, orcamento, mensagem } = parsed.data;
 
     await addContato({ nome, email, empresa, tipo, orcamento, mensagem });
 

@@ -10,6 +10,10 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
-export default function Conhecimento() {
-  return <ConhecimentoPage glossario={getGlossario()} artigos={getArtigos()} />;
+export default async function Conhecimento() {
+  const [glossario, artigos] = await Promise.all([
+    getGlossario(),
+    getArtigos(),
+  ]);
+  return <ConhecimentoPage glossario={glossario} artigos={artigos} />;
 }
