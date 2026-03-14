@@ -60,6 +60,8 @@ interface Projeto {
   parceiro?: string;
   controle: string;
   icon: string;
+  socio?: string;
+  porcentagem?: number;
   notasInternas?: string;
 }
 
@@ -84,6 +86,8 @@ const emptyProjeto: Projeto = {
   parceiro: "",
   controle: "",
   icon: "briefcase",
+  socio: "",
+  porcentagem: undefined,
 };
 
 export default function PortfolioAdminPage() {
@@ -609,6 +613,38 @@ function ProjectForm({
             onChange={(e) => onChange("controle", e.target.value)}
             className={`mt-1 ${inputClass}`}
             placeholder="Ex: 100% Holding"
+          />
+        </div>
+      </div>
+
+      {/* Row 6: Sócio + Porcentagem */}
+      <div className="grid md:grid-cols-2 gap-4">
+        <div>
+          <label className="text-xs font-medium text-muted uppercase tracking-wider">
+            Sócio
+          </label>
+          <input
+            value={data.socio || ""}
+            onChange={(e) => onChange("socio", e.target.value)}
+            className={`mt-1 ${inputClass}`}
+            placeholder="Nome do sócio operador"
+          />
+        </div>
+        <div>
+          <label className="text-xs font-medium text-muted uppercase tracking-wider">
+            Porcentagem (%)
+          </label>
+          <input
+            type="number"
+            min={0}
+            max={100}
+            step={0.1}
+            value={data.porcentagem ?? ""}
+            onChange={(e) =>
+              onChange("porcentagem", e.target.value === "" ? undefined : parseFloat(e.target.value))
+            }
+            className={`mt-1 ${inputClass}`}
+            placeholder="Ex: 50"
           />
         </div>
       </div>

@@ -72,6 +72,8 @@ model Projeto {
   parceiro          String?
   controle          String
   icon              String
+  socio             String?
+  porcentagem       Float?
   notasInternas     String?   @map("notas_internas") @db.Text
   ultimaAtualizacao DateTime? @map("ultima_atualizacao")
 

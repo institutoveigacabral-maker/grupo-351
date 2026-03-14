@@ -12,6 +12,8 @@ export interface Projeto {
   parceiro?: string;
   controle: string;
   icon: string;
+  socio?: string;
+  porcentagem?: number;
   notasInternas?: string;
   ultimaAtualizacao?: string;
 }
@@ -29,6 +31,8 @@ function mapRow(row: Record<string, unknown>): Projeto {
     parceiro: (row.parceiro as string) || undefined,
     controle: row.controle as string,
     icon: row.icon as string,
+    socio: (row.socio as string) || undefined,
+    porcentagem: row.porcentagem != null ? (row.porcentagem as number) : undefined,
     notasInternas: (row.notasInternas as string) || undefined,
     ultimaAtualizacao: row.ultimaAtualizacao
       ? (row.ultimaAtualizacao as Date).toISOString()

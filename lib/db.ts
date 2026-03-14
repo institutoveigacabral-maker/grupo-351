@@ -175,6 +175,8 @@ export async function addProjeto(data: Projeto): Promise<Projeto> {
       parceiro: data.parceiro || null,
       controle: data.controle,
       icon: data.icon,
+      socio: data.socio || null,
+      porcentagem: data.porcentagem ?? null,
       notasInternas: data.notasInternas || null,
       ultimaAtualizacao: new Date(),
     },
@@ -222,6 +224,8 @@ function mapProjeto(row: Record<string, unknown>): Projeto {
     parceiro: (row.parceiro as string) || undefined,
     controle: row.controle as string,
     icon: row.icon as string,
+    socio: (row.socio as string) || undefined,
+    porcentagem: row.porcentagem != null ? (row.porcentagem as number) : undefined,
     notasInternas: (row.notasInternas as string) || undefined,
     ultimaAtualizacao: row.ultimaAtualizacao
       ? (row.ultimaAtualizacao as Date).toISOString()
