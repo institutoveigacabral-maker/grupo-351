@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { getReuniaoDataset } from "@/lib/db";
 
-const SHARE_TOKEN = process.env.REUNIOES_TOKEN || "r351-gov-2026";
+const SHARE_TOKEN = process.env.REUNIOES_TOKEN;
+if (!SHARE_TOKEN) console.warn("WARNING: REUNIOES_TOKEN not set — reunioes API will reject all requests");
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);

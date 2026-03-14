@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getReuniaoDataset } from "@/lib/db";
 
-const SHARE_TOKEN = process.env.REUNIOES_TOKEN || "r351-gov-2026";
+const SHARE_TOKEN = process.env.REUNIOES_TOKEN;
 
 function daysSince(dateStr: string) {
   return Math.floor((Date.now() - new Date(dateStr + "T12:00:00").getTime()) / 86400000);

@@ -8,7 +8,7 @@ if (!ADMIN_SECRET) {
 }
 
 const COOKIE_NAME = "admin_session";
-const SESSION_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 days
+const SESSION_DURATION = 24 * 60 * 60 * 1000; // 24 hours
 
 function getSecret(): string {
   if (!ADMIN_SECRET) throw new Error("ADMIN_SECRET environment variable is required");

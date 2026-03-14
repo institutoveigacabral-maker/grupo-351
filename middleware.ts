@@ -33,18 +33,30 @@ async function verifyToken(token: string): Promise<boolean> {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  if (!pathname.startsWith("/admin")) return NextResponse.next();
-  if (pathname === "/admin/login") return NextResponse.next();
+  // Allow login/logout endpoints without auth
+  if (pathname === "/admin/login" || pathname === "/api/admin/login" || pathname === "/api/admin/logout") {
+    return NextResponse.next();
+  }
 
-  const session = request.cookies.get("admin_session");
-  if (!session || !(await verifyToken(session.value))) {
-    const loginUrl = new URL("/admin/login", request.url);
-    return NextResponse.redirect(loginUrl);
+  // Protect admin pages AND admin API routes
+  if (pathname.startsWith("/admin") || pathname.startsWith("/api/admin")) {
+    const session = request.cookies.get("admin_session");
+    if (!session || !(await verifyToken(session.value))) {
+      // API routes return 401 JSON; pages redirect to login
+      if (pathname.startsWith("/api/")) {
+        return NextResponse.json(
+          { error: "Não autorizado" },
+          { status: 401 }
+        );
+      }
+      const loginUrl = new URL("/admin/login", request.url);
+      return NextResponse.redirect(loginUrl);
+    }
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: ["/admin/:path*", "/api/admin/:path*"],
 };

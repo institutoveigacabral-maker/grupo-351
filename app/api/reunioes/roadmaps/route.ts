@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getReuniaoDataset } from "@/lib/db";
 
-const SHARE_TOKEN = process.env.REUNIOES_TOKEN || "r351-gov-2026";
+const SHARE_TOKEN = process.env.REUNIOES_TOKEN;
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);

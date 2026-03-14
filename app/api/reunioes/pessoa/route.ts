@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getReuniaoDataset } from "@/lib/db";
 
-const SHARE_TOKEN = process.env.REUNIOES_TOKEN || "r351-gov-2026";
+const SHARE_TOKEN = process.env.REUNIOES_TOKEN;
 
 function slugify(name: string) {
   return name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
