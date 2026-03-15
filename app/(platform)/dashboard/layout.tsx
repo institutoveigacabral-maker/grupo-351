@@ -11,6 +11,7 @@ import {
   FolderKanban,
   CreditCard,
   Key,
+  Users,
   LogOut,
   User,
   Menu,
@@ -32,6 +33,7 @@ const navItems = [
   { href: "/dashboard/oportunidades", label: "Oportunidades", icon: Lightbulb },
   { href: "/dashboard/matches", label: "Matches", icon: GitMerge },
   { href: "/dashboard/projetos", label: "Projetos", icon: FolderKanban },
+  { href: "/dashboard/equipe", label: "Equipe", icon: Users },
   { href: "/dashboard/plano", label: "Plano", icon: CreditCard },
   { href: "/dashboard/api", label: "API", icon: Key },
 ];

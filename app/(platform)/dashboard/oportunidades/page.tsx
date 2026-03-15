@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Lightbulb, Plus, X } from "lucide-react";
+import { Lightbulb, Plus, X, Pencil } from "lucide-react";
+import Link from "next/link";
 
 interface Opp {
   id: string;
@@ -167,9 +168,18 @@ export default function OportunidadesPage() {
                 </span>
               </div>
               <p className="text-sm text-gray-600 line-clamp-2">{opp.descricao}</p>
-              {opp.budget && (
-                <p className="text-xs text-amber-600 font-medium mt-2">{opp.budget}</p>
-              )}
+              <div className="flex items-center justify-between mt-2">
+                {opp.budget && (
+                  <p className="text-xs text-amber-600 font-medium">{opp.budget}</p>
+                )}
+                <Link
+                  href={`/dashboard/oportunidades/${opp.id}/editar`}
+                  className="inline-flex items-center gap-1 text-xs text-gray-400 hover:text-amber-600 transition-colors ml-auto"
+                >
+                  <Pencil className="w-3 h-3" />
+                  Editar
+                </Link>
+              </div>
             </div>
           ))}
         </div>

@@ -83,6 +83,48 @@ export async function sendContatoEmails(data: EmailContato) {
   }
 }
 
+// ─── Team Invite ───
+
+interface TeamInviteEmail {
+  to: string;
+  empresaNome: string;
+  convidadoPor: string;
+  role: string;
+  token: string;
+}
+
+export async function sendTeamInviteEmail(data: TeamInviteEmail) {
+  if (!resend) return;
+
+  const acceptUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://grupo351.com"}/convite?token=${data.token}`;
+
+  await resend.emails.send({
+    from: FROM_EMAIL,
+    to: data.to,
+    subject: `Convite para equipe — ${data.empresaNome}`,
+    html: `
+      <div style="font-family: system-ui, sans-serif; max-width: 560px; margin: 0 auto; color: #1a1a1a;">
+        <div style="padding: 32px 0; border-bottom: 1px solid #eee;">
+          <h1 style="font-size: 20px; color: #0B1D32; margin: 0;">Grupo +351</h1>
+        </div>
+        <div style="padding: 32px 0;">
+          <p>Olá,</p>
+          <p><strong>${data.convidadoPor}</strong> convidou-o para fazer parte da equipe de <strong>${data.empresaNome}</strong> na plataforma Grupo +351.</p>
+          <div style="background: #f8f9fb; border-radius: 12px; padding: 20px; margin: 24px 0;">
+            <p style="margin: 0 0 4px;"><strong>Empresa:</strong> ${data.empresaNome}</p>
+            <p style="margin: 0;"><strong>Cargo:</strong> ${data.role === "admin" ? "Administrador" : "Membro"}</p>
+          </div>
+          <a href="${acceptUrl}" style="display: inline-block; background: #D4A853; color: white; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px;">
+            Aceitar convite
+          </a>
+          <p style="color: #666; font-size: 13px; margin-top: 24px;">Este convite expira em 7 dias. Se não reconhece este convite, ignore este email.</p>
+          <p style="color: #666; font-size: 13px;">Cascais, Portugal<br/>contato@grupo351.com</p>
+        </div>
+      </div>
+    `,
+  }).catch((err) => console.error("Email convite equipe falhou:", err));
+}
+
 export async function sendCandidaturaEmails(data: EmailCandidatura) {
   if (!resend) return;
 
