@@ -50,7 +50,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Crie uma empresa primeiro" }, { status: 403 });
   }
 
-  const body = await request.json();
+  let body;
+  try { body = await request.json(); } catch {
+    return NextResponse.json({ error: "JSON inválido" }, { status: 400 });
+  }
   const { action, planId } = body;
 
   try {

@@ -15,14 +15,13 @@
 import Stripe from "stripe";
 import { prisma } from "./prisma";
 
-let _stripe: Stripe | null = null;
-
 function getStripe(): Stripe {
-  if (_stripe) return _stripe;
   const stripeKey = process.env.STRIPE_SECRET_KEY;
   if (!stripeKey) throw new Error("STRIPE_SECRET_KEY não configurada");
-  _stripe = new Stripe(stripeKey);
-  return _stripe;
+  return new Stripe(stripeKey, {
+    maxNetworkRetries: 1,
+    timeout: 10000,
+  });
 }
 
 // ─── Planos ───
