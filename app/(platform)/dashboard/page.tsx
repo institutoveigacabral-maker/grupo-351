@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Building2, Lightbulb, GitMerge, TrendingUp, ArrowRight, Plus } from "lucide-react";
+import { Building2, Lightbulb, GitMerge, TrendingUp, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { OnboardingTour } from "@/components/OnboardingTour";
 
 interface DashboardData {
   company: { slug: string; nome: string; setor: string; estagio: string; verificada: boolean } | null;
@@ -49,29 +50,11 @@ export default function DashboardPage() {
         </p>
       </div>
 
-      {/* Setup wizard (se não tem empresa) */}
-      {!data.company && (
-        <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/50 rounded-2xl p-6">
-          <div className="flex items-start gap-4">
-            <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center shrink-0">
-              <Building2 className="w-5 h-5 text-amber-700" />
-            </div>
-            <div className="flex-1">
-              <h2 className="font-semibold text-gray-900">Crie o perfil da sua empresa</h2>
-              <p className="text-sm text-gray-600 mt-1">
-                Para acessar oportunidades e receber matches, registre sua empresa na plataforma.
-              </p>
-              <Link
-                href="/dashboard/empresa"
-                className="inline-flex items-center gap-2 bg-amber-600 text-white px-4 py-2 rounded-lg text-sm font-medium mt-4 hover:bg-amber-500 transition-all"
-              >
-                <Plus className="w-4 h-4" />
-                Criar empresa
-              </Link>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Onboarding tour */}
+      <OnboardingTour
+        hasCompany={!!data.company}
+        hasOpportunity={data.opportunities > 0}
+      />
 
       {/* Quick stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

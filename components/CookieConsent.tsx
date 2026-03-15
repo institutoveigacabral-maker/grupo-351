@@ -17,11 +17,13 @@ export function CookieConsent() {
 
   function accept() {
     localStorage.setItem("cookie-consent", "accepted");
+    localStorage.setItem("cookie-consent-date", new Date().toISOString());
     setVisible(false);
   }
 
   function decline() {
     localStorage.setItem("cookie-consent", "declined");
+    localStorage.setItem("cookie-consent-date", new Date().toISOString());
     setVisible(false);
   }
 
