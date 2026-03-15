@@ -15,13 +15,32 @@
 import Stripe from "stripe";
 import { prisma } from "./prisma";
 
+function getStripeKey(): string {
+  const key = process.env.STRIPE_SECRET_KEY;
+  if (!key) throw new Error("STRIPE_SECRET_KEY não configurada");
+  return key;
+}
+
 function getStripe(): Stripe {
-  const stripeKey = process.env.STRIPE_SECRET_KEY;
-  if (!stripeKey) throw new Error("STRIPE_SECRET_KEY não configurada");
-  return new Stripe(stripeKey, {
+  return new Stripe(getStripeKey(), {
     maxNetworkRetries: 1,
     timeout: 10000,
   });
+}
+
+// Fallback: chamada direta à API Stripe via fetch (evita problemas do SDK em serverless)
+async function stripeAPI(endpoint: string, params: Record<string, string>): Promise<Record<string, unknown>> {
+  const res = await fetch(`https://api.stripe.com/v1/${endpoint}`, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${getStripeKey()}`,
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: new URLSearchParams(params).toString(),
+  });
+  const data = await res.json();
+  if (data.error) throw new Error(data.error.message || "Stripe API error");
+  return data;
 }
 
 // ─── Planos ───
@@ -93,7 +112,6 @@ export async function createCheckoutSession(
   successUrl: string,
   cancelUrl: string
 ): Promise<string> {
-  const stripe = getStripe();
   const plan = PLANS[planId];
   if (!plan || plan.preco === 0) throw new Error("Plano inválido para checkout");
 
@@ -103,30 +121,31 @@ export async function createCheckoutSession(
   });
   if (!company) throw new Error("Empresa não encontrada");
 
-  // Reutilizar customer se existir, senão usar customer_email no checkout
   const customerId = company.subscription?.stripeCustomerId;
 
-  const session = await stripe.checkout.sessions.create({
-    ...(customerId ? { customer: customerId } : { customer_email: company.owner.email }),
-    mode: "subscription",
-    line_items: [
-      {
-        price_data: {
-          currency: "eur",
-          product_data: { name: `Grupo +351 — Plano ${plan.nome}` },
-          recurring: { interval: plan.intervalo },
-          unit_amount: plan.preco,
-        },
-        quantity: 1,
-      },
-    ],
-    success_url: successUrl,
-    cancel_url: cancelUrl,
-    metadata: { companyId, planId },
-  });
+  // Usar fetch direto para evitar problemas do SDK v20 em serverless
+  const params: Record<string, string> = {
+    "mode": "subscription",
+    "line_items[0][price_data][currency]": "eur",
+    "line_items[0][price_data][product_data][name]": `Grupo +351 — Plano ${plan.nome}`,
+    "line_items[0][price_data][recurring][interval]": plan.intervalo,
+    "line_items[0][price_data][unit_amount]": String(plan.preco),
+    "line_items[0][quantity]": "1",
+    "success_url": successUrl,
+    "cancel_url": cancelUrl,
+    "metadata[companyId]": companyId,
+    "metadata[planId]": planId,
+  };
 
+  if (customerId) {
+    params["customer"] = customerId;
+  } else {
+    params["customer_email"] = company.owner.email;
+  }
+
+  const session = await stripeAPI("checkout/sessions", params);
   if (!session.url) throw new Error("Stripe não retornou URL de checkout");
-  return session.url;
+  return session.url as string;
 }
 
 // ─── Portal de Billing ───
@@ -135,12 +154,11 @@ export async function createBillingPortalSession(
   stripeCustomerId: string,
   returnUrl: string
 ): Promise<string> {
-  const stripe = getStripe();
-  const session = await stripe.billingPortal.sessions.create({
+  const session = await stripeAPI("billing_portal/sessions", {
     customer: stripeCustomerId,
     return_url: returnUrl,
   });
-  return session.url;
+  return session.url as string;
 }
 
 // ─── Webhook handler ───
