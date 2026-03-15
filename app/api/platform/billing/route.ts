@@ -67,12 +67,14 @@ export async function POST(request: Request) {
     }
 
     if (action === "checkout" && planId) {
-      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://grupo-351.vercel.app";
+      const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || "https://grupo-351.vercel.app").replace(/\/+$/, "");
+      const successUrl = `${baseUrl}/dashboard/plano?success=true`;
+      const cancelUrl = `${baseUrl}/dashboard/plano?canceled=true`;
       const url = await createCheckoutSession(
         company.id,
         planId,
-        `${baseUrl}/dashboard/plano?success=true`,
-        `${baseUrl}/dashboard/plano?canceled=true`
+        successUrl,
+        cancelUrl
       );
       return NextResponse.json({ url });
     }
@@ -81,6 +83,11 @@ export async function POST(request: Request) {
   } catch (err) {
     console.error("[billing]", err);
     const msg = err instanceof Error ? err.message : "Erro no pagamento";
-    return NextResponse.json({ error: msg, detail: err instanceof Error ? err.stack?.split("\n")[1]?.trim() : undefined }, { status: 500 });
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "(not set)";
+    return NextResponse.json({
+      error: msg,
+      debug_baseUrl: baseUrl,
+      detail: err instanceof Error ? err.stack?.split("\n")[1]?.trim() : undefined,
+    }, { status: 500 });
   }
 }
