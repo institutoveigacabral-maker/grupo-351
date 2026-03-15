@@ -86,7 +86,11 @@ export async function middleware(request: NextRequest) {
   // ─── Plataforma routes (dashboard, empresas, oportunidades) ───
   if (pathname.startsWith("/dashboard") || pathname.startsWith("/api/platform")) {
     // Allow auth endpoints
-    if (pathname === "/api/platform/auth/login" || pathname === "/api/platform/auth/register") {
+    if (
+      pathname === "/api/platform/auth/login" ||
+      pathname === "/api/platform/auth/register" ||
+      pathname.startsWith("/api/platform/auth/google")
+    ) {
       return NextResponse.next();
     }
 
