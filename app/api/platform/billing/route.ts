@@ -83,11 +83,6 @@ export async function POST(request: Request) {
   } catch (err) {
     console.error("[billing]", err);
     const msg = err instanceof Error ? err.message : "Erro no pagamento";
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "(not set)";
-    return NextResponse.json({
-      error: msg,
-      debug_baseUrl: baseUrl,
-      detail: err instanceof Error ? err.stack?.split("\n")[1]?.trim() : undefined,
-    }, { status: 500 });
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }

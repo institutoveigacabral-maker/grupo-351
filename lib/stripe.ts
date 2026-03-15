@@ -31,33 +31,19 @@ function getStripe(): Stripe {
 // Chamada direta à API Stripe via fetch (evita problemas do SDK em serverless)
 async function stripeAPI(endpoint: string, params: Record<string, string>): Promise<Record<string, unknown>> {
   const body = new URLSearchParams(params).toString();
-  const url = `https://api.stripe.com/v1/${endpoint}`;
-  const key = getStripeKey();
 
-  let res: Response;
-  try {
-    res = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${key}`,
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body,
-    });
-  } catch (fetchErr) {
-    throw new Error(`[stripeAPI fetch failed] ${fetchErr instanceof Error ? fetchErr.message : String(fetchErr)}`);
-  }
-
-  let data: Record<string, unknown>;
-  try {
-    data = await res.json() as Record<string, unknown>;
-  } catch (jsonErr) {
-    throw new Error(`[stripeAPI json parse failed] status=${res.status} ${jsonErr instanceof Error ? jsonErr.message : String(jsonErr)}`);
-  }
-
+  const res = await fetch(`https://api.stripe.com/v1/${endpoint}`, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${getStripeKey()}`,
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body,
+  });
+  const data = await res.json() as Record<string, unknown>;
   if (data.error) {
     const err = data.error as Record<string, string>;
-    throw new Error(`[Stripe error] ${err.message || "unknown"} (type=${err.type}, param=${err.param})`);
+    throw new Error(err.message || "Stripe API error");
   }
   return data;
 }
