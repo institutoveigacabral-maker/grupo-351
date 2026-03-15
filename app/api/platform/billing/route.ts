@@ -61,22 +61,18 @@ export async function POST(request: Request) {
       // Abrir portal de billing do Stripe
       const url = await createBillingPortalSession(
         company.subscription.stripeCustomerId,
-        `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/dashboard/plano`
+        `${process.env.NEXT_PUBLIC_APP_URL || "https://grupo-351.vercel.app"}/dashboard/plano`
       );
       return NextResponse.json({ url });
     }
 
     if (action === "checkout" && planId) {
-      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-      console.log("[billing] baseUrl:", baseUrl, "planId:", planId, "companyId:", company.id);
-      const successUrl = `${baseUrl}/dashboard/plano?success=true`;
-      const cancelUrl = `${baseUrl}/dashboard/plano?canceled=true`;
-      console.log("[billing] successUrl:", successUrl, "cancelUrl:", cancelUrl);
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://grupo-351.vercel.app";
       const url = await createCheckoutSession(
         company.id,
         planId,
-        successUrl,
-        cancelUrl
+        `${baseUrl}/dashboard/plano?success=true`,
+        `${baseUrl}/dashboard/plano?canceled=true`
       );
       return NextResponse.json({ url });
     }

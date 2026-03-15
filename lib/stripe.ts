@@ -33,8 +33,6 @@ async function stripeAPI(endpoint: string, params: Record<string, string>): Prom
   const body = new URLSearchParams(params).toString();
   const url = `https://api.stripe.com/v1/${endpoint}`;
 
-  console.log("[stripeAPI] url:", url, "body length:", body.length);
-
   const res = await fetch(url, {
     method: "POST",
     headers: {
