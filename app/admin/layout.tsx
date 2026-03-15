@@ -19,14 +19,20 @@ import {
   UserCog,
   Building2,
   ShieldCheck,
+  Target,
+  GitPullRequest,
+  Wallet,
 } from "lucide-react";
 import { useState } from "react";
 import { Logo } from "@/components/Logo";
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/admin/usuarios", label: "Utilizadores", icon: UserCog, section: "plataforma" },
-  { href: "/admin/empresas", label: "Empresas", icon: Building2, section: "plataforma" },
+  { href: "/admin/usuarios", label: "Utilizadores", icon: UserCog },
+  { href: "/admin/empresas", label: "Empresas", icon: Building2 },
+  { href: "/admin/oportunidades", label: "Oportunidades", icon: Target },
+  { href: "/admin/deals", label: "Pipeline Deals", icon: GitPullRequest },
+  { href: "/admin/financeiro", label: "Financeiro", icon: Wallet },
   { href: "/admin/candidaturas", label: "Candidaturas", icon: Users },
   { href: "/admin/contatos", label: "Contatos", icon: Mail },
   { href: "/admin/portfolio", label: "Portfólio", icon: Briefcase },
@@ -34,13 +40,16 @@ const navItems = [
   { href: "/admin/parceiros", label: "Parceiros", icon: Handshake },
   { href: "/admin/reunioes", label: "Reuniões", icon: CalendarDays },
   { href: "/admin/inteligencia", label: "Inteligência", icon: Brain },
-  { href: "/admin/equipe", label: "Equipe", icon: ShieldCheck, section: "config" },
+  { href: "/admin/equipe", label: "Equipe", icon: ShieldCheck },
 ];
 
 const pageTitle: Record<string, string> = {
   "/admin": "Dashboard",
   "/admin/usuarios": "Utilizadores",
   "/admin/empresas": "Empresas",
+  "/admin/oportunidades": "Oportunidades",
+  "/admin/deals": "Pipeline de Deals",
+  "/admin/financeiro": "Financeiro",
   "/admin/candidaturas": "Candidaturas",
   "/admin/contatos": "Contatos",
   "/admin/portfolio": "Portfólio",
