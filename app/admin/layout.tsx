@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard,
@@ -25,6 +26,8 @@ import {
   FolderKanban,
   BarChart3,
   ScrollText,
+  Bell,
+  Settings,
 } from "lucide-react";
 import { useState } from "react";
 import { Logo } from "@/components/Logo";
@@ -47,6 +50,7 @@ const navItems = [
   { href: "/admin/inteligencia", label: "Inteligência", icon: Brain },
   { href: "/admin/equipe", label: "Equipe", icon: ShieldCheck },
   { href: "/admin/auditoria", label: "Auditoria", icon: ScrollText },
+  { href: "/admin/configuracoes", label: "Configurações", icon: Settings },
 ];
 
 const pageTitle: Record<string, string> = {
@@ -67,6 +71,7 @@ const pageTitle: Record<string, string> = {
   "/admin/inteligencia": "Inteligência",
   "/admin/equipe": "Equipe Admin",
   "/admin/auditoria": "Auditoria",
+  "/admin/configuracoes": "Configurações",
 };
 
 export default function AdminLayout({
@@ -77,6 +82,37 @@ export default function AdminLayout({
   const pathname = usePathname();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [notifCount, setNotifCount] = useState(0);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [notifications, setNotifications] = useState<{ id: string; tipo: string; titulo: string; mensagem: string; link: string | null; lida: boolean; criadoEm: string }[]>([]);
+
+  const fetchNotifications = useCallback(() => {
+    fetch("/api/admin/notifications")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.notifications) setNotifications(data.notifications.slice(0, 10));
+        if (typeof data.unreadCount === "number") setNotifCount(data.unreadCount);
+      })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (pathname !== "/admin/login") {
+      fetchNotifications();
+      const interval = setInterval(fetchNotifications, 60000);
+      return () => clearInterval(interval);
+    }
+  }, [pathname, fetchNotifications]);
+
+  async function markAllRead() {
+    await fetch("/api/admin/notifications", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ markAllRead: true }),
+    });
+    setNotifCount(0);
+    setNotifications((prev) => prev.map((n) => ({ ...n, lida: true })));
+  }
 
   if (pathname === "/admin/login") {
     return <>{children}</>;
@@ -215,6 +251,55 @@ export default function AdminLayout({
           <div className="flex-1" />
 
           <div className="flex items-center gap-3">
+            {/* Notifications bell */}
+            <div className="relative">
+              <button
+                onClick={() => setNotifOpen(!notifOpen)}
+                className="relative p-2 rounded-lg text-muted hover:text-foreground hover:bg-black/5 transition-all"
+              >
+                <Bell className="w-4.5 h-4.5" />
+                {notifCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 w-4.5 h-4.5 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+                    {notifCount > 9 ? "9+" : notifCount}
+                  </span>
+                )}
+              </button>
+              {notifOpen && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setNotifOpen(false)} />
+                  <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-xl border border-border shadow-xl z-50 overflow-hidden">
+                    <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+                      <p className="text-xs font-semibold text-foreground">Notificações</p>
+                      {notifCount > 0 && (
+                        <button onClick={markAllRead} className="text-[10px] text-accent hover:underline">
+                          Marcar todas como lidas
+                        </button>
+                      )}
+                    </div>
+                    <div className="max-h-72 overflow-y-auto">
+                      {notifications.length === 0 ? (
+                        <p className="text-xs text-muted text-center py-8">Sem notificações</p>
+                      ) : (
+                        notifications.map((n) => (
+                          <a
+                            key={n.id}
+                            href={n.link || "#"}
+                            className={`block px-4 py-3 hover:bg-surface/50 transition-colors border-b border-border last:border-0 ${!n.lida ? "bg-accent/5" : ""}`}
+                            onClick={() => setNotifOpen(false)}
+                          >
+                            <p className="text-xs font-medium text-foreground">{n.titulo}</p>
+                            <p className="text-[10px] text-muted mt-0.5 line-clamp-2">{n.mensagem}</p>
+                            <p className="text-[9px] text-muted/60 mt-1">
+                              {new Date(n.criadoEm).toLocaleString("pt-PT")}
+                            </p>
+                          </a>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
             <div className="h-7 w-px bg-border" />
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-accent to-accent-light flex items-center justify-center">
               <span className="text-white text-xs font-bold">HL</span>
