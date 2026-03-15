@@ -5,6 +5,8 @@ import { JsonLd } from "@/components/JsonLd";
 import { Analytics } from "@/components/Analytics";
 import { ServiceWorker } from "@/components/ServiceWorker";
 import { organizationSchema, webSiteSchema } from "@/lib/schema";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages } from "next-intl/server";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -56,13 +58,16 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
+  const messages = await getMessages();
+
   return (
-    <html lang="pt">
+    <html lang={locale}>
       <head>
         <JsonLd data={[organizationSchema(), webSiteSchema()]} />
         <link rel="manifest" href="/manifest.json" />
@@ -74,7 +79,9 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${geistSans.variable} antialiased`}
       >
-        {children}
+        <NextIntlClientProvider messages={messages} locale={locale}>
+          {children}
+        </NextIntlClientProvider>
         <Analytics />
         <ServiceWorker />
       </body>

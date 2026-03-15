@@ -1,0 +1,109 @@
+{
+  "nav": {
+    "overview": "Visão geral",
+    "company": "Minha empresa",
+    "opportunities": "Oportunidades",
+    "matches": "Matches",
+    "projects": "Projetos",
+    "team": "Equipe",
+    "plan": "Plano",
+    "api": "API",
+    "platform": "Plataforma"
+  },
+  "header": {
+    "notifications": "Notificações",
+    "markAllRead": "Marcar todas como lidas",
+    "noNotifications": "Sem notificações"
+  },
+  "dashboard": {
+    "greeting": "Olá, {name}",
+    "subtitle": "Bem-vindo ao ecossistema +351. Aqui está o resumo da sua atividade.",
+    "createCompany": "Crie o perfil da sua empresa",
+    "createCompanyDesc": "Para acessar oportunidades e receber matches, registre sua empresa na plataforma.",
+    "createCompanyBtn": "Criar empresa",
+    "company": "Empresa",
+    "notRegistered": "Não cadastrada",
+    "openOpportunities": "Oportunidades abertas",
+    "activeMatches": "Matches ativos",
+    "recentOpportunities": "Oportunidades recentes",
+    "viewAll": "Ver todas",
+    "loading": "Carregando...",
+    "noOpportunities": "Nenhuma oportunidade publicada ainda.",
+    "beFirst": "Seja o primeiro a criar uma."
+  },
+  "ai": {
+    "assistant": "Assistente +351",
+    "howCanIHelp": "Como posso ajudar?",
+    "placeholder": "Escreva uma pergunta...",
+    "networkError": "Erro de rede. Tente novamente.",
+    "processError": "Erro ao processar. Tente novamente.",
+    "insights": "Insights IA",
+    "regenerate": "Regenerar",
+    "generate": "Gerar insights",
+    "generateDesc": "Clique em \"Gerar insights\" para obter uma análise IA deste match.",
+    "analyzing": "Analisando match...",
+    "insightError": "Erro ao gerar insights. Tente novamente."
+  },
+  "common": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "create": "Criar",
+    "search": "Pesquisar",
+    "filter": "Filtrar",
+    "close": "Fechar",
+    "confirm": "Confirmar",
+    "back": "Voltar",
+    "next": "Seguinte",
+    "yes": "Sim",
+    "no": "Não",
+    "or": "ou",
+    "logout": "Sair"
+  },
+  "team": {
+    "title": "Equipe",
+    "inviteMember": "Convidar membro",
+    "emailPlaceholder": "email@exemplo.com",
+    "role": "Cargo",
+    "owner": "Proprietário",
+    "admin": "Administrador",
+    "member": "Membro",
+    "pending": "Pendente",
+    "remove": "Remover",
+    "inviteSent": "Convite enviado",
+    "noMembers": "Nenhum membro na equipe."
+  },
+  "opportunities": {
+    "title": "Oportunidades",
+    "create": "Criar oportunidade",
+    "edit": "Editar oportunidade",
+    "type": "Tipo",
+    "sector": "Setor",
+    "country": "País",
+    "budget": "Budget",
+    "status": "Estado",
+    "active": "Ativa",
+    "closed": "Fechada",
+    "description": "Descrição",
+    "requirements": "Requisitos"
+  },
+  "plan": {
+    "title": "Plano e Faturação",
+    "plans": "Planos",
+    "invoices": "Faturas",
+    "currentPlan": "Plano atual",
+    "upgrade": "Fazer upgrade",
+    "free": "Gratuito",
+    "growth": "Growth",
+    "enterprise": "Enterprise"
+  },
+  "verification": {
+    "title": "Verificação",
+    "submitDoc": "Submeter documento",
+    "pending": "Pendente",
+    "approved": "Aprovado",
+    "rejected": "Rejeitado",
+    "verified": "Verificada"
+  }
+}

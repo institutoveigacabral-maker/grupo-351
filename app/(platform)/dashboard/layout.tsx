@@ -20,6 +20,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { AIAssistant } from "@/components/AIAssistant";
+import { LocaleSwitcher } from "@/components/LocaleSwitcher";
+import { useTranslations } from "next-intl";
 
 interface UserData {
   id: string;
@@ -39,20 +41,21 @@ interface Notification {
   criadoEm: string;
 }
 
-const navItems = [
-  { href: "/dashboard", label: "Visão geral", icon: LayoutDashboard },
-  { href: "/dashboard/empresa", label: "Minha empresa", icon: Building2 },
-  { href: "/dashboard/oportunidades", label: "Oportunidades", icon: Lightbulb },
-  { href: "/dashboard/matches", label: "Matches", icon: GitMerge },
-  { href: "/dashboard/projetos", label: "Projetos", icon: FolderKanban },
-  { href: "/dashboard/equipe", label: "Equipe", icon: Users },
-  { href: "/dashboard/plano", label: "Plano", icon: CreditCard },
-  { href: "/dashboard/api", label: "API", icon: Key },
+const navKeys = [
+  { href: "/dashboard", key: "nav.overview", icon: LayoutDashboard },
+  { href: "/dashboard/empresa", key: "nav.company", icon: Building2 },
+  { href: "/dashboard/oportunidades", key: "nav.opportunities", icon: Lightbulb },
+  { href: "/dashboard/matches", key: "nav.matches", icon: GitMerge },
+  { href: "/dashboard/projetos", key: "nav.projects", icon: FolderKanban },
+  { href: "/dashboard/equipe", key: "nav.team", icon: Users },
+  { href: "/dashboard/plano", key: "nav.plan", icon: CreditCard },
+  { href: "/dashboard/api", key: "nav.api", icon: Key },
 ];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
+  const t = useTranslations();
   const [user, setUser] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const [mobileNav, setMobileNav] = useState(false);
@@ -128,7 +131,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </button>
             <Link href="/dashboard" className="flex items-center gap-3">
               <Logo className="text-[#0B1D32]" size={22} />
-              <span className="text-xs font-medium text-gray-400 hidden sm:block">Plataforma</span>
+              <span className="text-xs font-medium text-gray-400 hidden sm:block">{t("nav.platform")}</span>
             </Link>
           </div>
 
@@ -151,16 +154,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   <div className="fixed inset-0 z-40" onClick={() => setNotifOpen(false)} />
                   <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-xl border border-gray-200 shadow-xl z-50 overflow-hidden">
                     <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
-                      <p className="text-xs font-semibold text-gray-900">Notificações</p>
+                      <p className="text-xs font-semibold text-gray-900">{t("header.notifications")}</p>
                       {notifCount > 0 && (
                         <button onClick={markAllRead} className="text-[10px] text-amber-600 hover:underline">
-                          Marcar todas como lidas
+                          {t("header.markAllRead")}
                         </button>
                       )}
                     </div>
                     <div className="max-h-72 overflow-y-auto">
                       {notifications.length === 0 ? (
-                        <p className="text-xs text-gray-400 text-center py-8">Sem notificações</p>
+                        <p className="text-xs text-gray-400 text-center py-8">{t("header.noNotifications")}</p>
                       ) : (
                         notifications.map((n) => (
                           <Link
@@ -183,6 +186,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               )}
             </div>
 
+            <LocaleSwitcher />
             <div className="hidden md:flex items-center gap-2">
               <div className="w-7 h-7 rounded-full bg-amber-100 flex items-center justify-center">
                 <User className="w-3.5 h-3.5 text-amber-700" />
@@ -207,7 +211,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           fixed md:sticky top-14 z-40 md:z-0
         `}>
           <nav className="p-3 space-y-0.5">
-            {navItems.map(({ href, label, icon: Icon }) => {
+            {navKeys.map(({ href, key, icon: Icon }) => {
               const active = pathname === href;
               return (
                 <Link
@@ -221,7 +225,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   }`}
                 >
                   <Icon className="w-4 h-4" />
-                  {label}
+                  {t(key)}
                 </Link>
               );
             })}

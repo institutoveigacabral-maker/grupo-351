@@ -1,0 +1,109 @@
+{
+  "nav": {
+    "overview": "Overview",
+    "company": "My company",
+    "opportunities": "Opportunities",
+    "matches": "Matches",
+    "projects": "Projects",
+    "team": "Team",
+    "plan": "Plan",
+    "api": "API",
+    "platform": "Platform"
+  },
+  "header": {
+    "notifications": "Notifications",
+    "markAllRead": "Mark all as read",
+    "noNotifications": "No notifications"
+  },
+  "dashboard": {
+    "greeting": "Hello, {name}",
+    "subtitle": "Welcome to the +351 ecosystem. Here's a summary of your activity.",
+    "createCompany": "Create your company profile",
+    "createCompanyDesc": "To access opportunities and receive matches, register your company on the platform.",
+    "createCompanyBtn": "Create company",
+    "company": "Company",
+    "notRegistered": "Not registered",
+    "openOpportunities": "Open opportunities",
+    "activeMatches": "Active matches",
+    "recentOpportunities": "Recent opportunities",
+    "viewAll": "View all",
+    "loading": "Loading...",
+    "noOpportunities": "No opportunities published yet.",
+    "beFirst": "Be the first to create one."
+  },
+  "ai": {
+    "assistant": "+351 Assistant",
+    "howCanIHelp": "How can I help?",
+    "placeholder": "Type a question...",
+    "networkError": "Network error. Try again.",
+    "processError": "Processing error. Try again.",
+    "insights": "AI Insights",
+    "regenerate": "Regenerate",
+    "generate": "Generate insights",
+    "generateDesc": "Click \"Generate insights\" to get an AI analysis of this match.",
+    "analyzing": "Analyzing match...",
+    "insightError": "Error generating insights. Try again."
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "search": "Search",
+    "filter": "Filter",
+    "close": "Close",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "yes": "Yes",
+    "no": "No",
+    "or": "or",
+    "logout": "Logout"
+  },
+  "team": {
+    "title": "Team",
+    "inviteMember": "Invite member",
+    "emailPlaceholder": "email@example.com",
+    "role": "Role",
+    "owner": "Owner",
+    "admin": "Admin",
+    "member": "Member",
+    "pending": "Pending",
+    "remove": "Remove",
+    "inviteSent": "Invite sent",
+    "noMembers": "No team members."
+  },
+  "opportunities": {
+    "title": "Opportunities",
+    "create": "Create opportunity",
+    "edit": "Edit opportunity",
+    "type": "Type",
+    "sector": "Sector",
+    "country": "Country",
+    "budget": "Budget",
+    "status": "Status",
+    "active": "Active",
+    "closed": "Closed",
+    "description": "Description",
+    "requirements": "Requirements"
+  },
+  "plan": {
+    "title": "Plan & Billing",
+    "plans": "Plans",
+    "invoices": "Invoices",
+    "currentPlan": "Current plan",
+    "upgrade": "Upgrade",
+    "free": "Free",
+    "growth": "Growth",
+    "enterprise": "Enterprise"
+  },
+  "verification": {
+    "title": "Verification",
+    "submitDoc": "Submit document",
+    "pending": "Pending",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "verified": "Verified"
+  }
+}

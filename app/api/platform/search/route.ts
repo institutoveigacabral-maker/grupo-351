@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { searchPlatform } from "@/lib/search";
+import { cached } from "@/lib/cache";
 
 // GET — busca global (oportunidades + empresas)
 export async function GET(request: Request) {
@@ -11,6 +12,11 @@ export async function GET(request: Request) {
     return NextResponse.json({ results: [] });
   }
 
-  const results = await searchPlatform(q, limit);
+  const results = await cached(
+    `search:${q.toLowerCase().trim()}:${limit}`,
+    () => searchPlatform(q, limit),
+    120
+  );
+
   return NextResponse.json({ results, query: q });
 }
