@@ -19,6 +19,7 @@ import {
   Bell,
 } from "lucide-react";
 import Link from "next/link";
+import { AIAssistant } from "@/components/AIAssistant";
 
 interface UserData {
   id: string;
@@ -232,6 +233,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           {children}
         </main>
       </div>
+
+      {/* AI Assistant */}
+      <AIAssistant />
     </div>
   );
 }
