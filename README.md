@@ -1,36 +1,54 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Grupo +351
 
-## Getting Started
+Plataforma multi-sided do Grupo +351 para operações em Portugal. Inclui site público, portal de clientes, plataforma administrativa, sistema de reuniões, integração com IA (Gemini/Anthropic), CRM e pagamentos via Stripe.
 
-First, run the development server:
+## Tech Stack
+
+- Next.js 16 + React 19 + TypeScript
+- Prisma ORM + Neon (PostgreSQL serverless)
+- NextAuth.js (autenticação)
+- Google Gemini / Anthropic Claude (IA)
+- Stripe (pagamentos)
+- Sentry (observabilidade)
+- Tailwind CSS + Framer Motion
+- Resend (e-mail transacional)
+
+## Como rodar
 
 ```bash
+git clone https://github.com/institutoveigacabral-maker/grupo-351.git
+cd grupo-351
+npm install
+npx prisma generate
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Variáveis de ambiente
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Copie `.env.example` para `.env.local` e preencha:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Variável | Descrição |
+|----------|-----------|
+| `DATABASE_URL` | Connection string PostgreSQL (Neon) |
+| `ADMIN_SECRET` | Chave secreta HMAC para admin |
+| `GOOGLE_API_KEY` | Chave do Google Gemini (opcional) |
+| `ANTHROPIC_API_KEY` | Chave da Anthropic (opcional) |
+| `STRIPE_SECRET_KEY` | Chave secreta Stripe |
+| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Chave pública Stripe |
+| `RESEND_API_KEY` | Chave do Resend (e-mail) |
+| `NEXT_PUBLIC_SENTRY_DSN` | DSN do Sentry (opcional) |
 
-## Learn More
+Veja `.env.example` para a lista completa.
 
-To learn more about Next.js, take a look at the following resources:
+## Estrutura
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+app/
+├── (site)/       # Site público
+├── (portal)/     # Portal de clientes
+├── (platform)/   # Plataforma interna
+├── admin/        # Painel administrativo
+├── api/          # API routes
+└── reunioes/     # Sistema de reuniões
+prisma/           # Schema do banco de dados
+```
