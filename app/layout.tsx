@@ -10,7 +10,6 @@ import { organizationSchema, webSiteSchema } from "@/lib/schema";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import { Analytics as VercelAnalytics } from "@vercel/analytics/react";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -103,7 +102,6 @@ export default async function RootLayout({
         <WebVitals />
         <ServiceWorker />
         <VercelAnalytics />
-        <SpeedInsights />
       </body>
     </html>
   );
