@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Building2, MapPin, BadgeCheck, ArrowRight, Globe, Sparkles } from "lucide-react";
 import type { Metadata } from "next";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 600; // ISR: 10 min
 
 export const metadata: Metadata = {
   title: "Empresas — GRUPO +351",

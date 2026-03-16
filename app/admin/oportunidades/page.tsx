@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Search, Star, StarOff, Building2 } from "lucide-react";
+import Image from "next/image";
 
 interface AdminOpportunity {
   id: string;
@@ -188,7 +189,7 @@ export default function OportunidadesPage() {
                     <td className="py-3 px-4 hidden lg:table-cell">
                       <div className="flex items-center gap-2">
                         {o.company.logo ? (
-                          <img src={o.company.logo} alt="" className="w-6 h-6 rounded object-cover" />
+                          <Image src={o.company.logo} alt={`Logo de ${o.company.nome}`} width={24} height={24} className="w-6 h-6 rounded object-cover" />
                         ) : (
                           <Building2 className="w-4 h-4 text-muted" />
                         )}

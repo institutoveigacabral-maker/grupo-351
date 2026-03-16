@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     "Conheça os negócios e projetos em desenvolvimento pelo Grupo +351. Manufatura digital, e-commerce, sourcing internacional e mais.",
 };
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600; // ISR: 1 hora
 
 export default async function Portfolio() {
   const projetos = await getProjetos();

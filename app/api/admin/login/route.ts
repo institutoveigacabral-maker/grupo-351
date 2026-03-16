@@ -8,7 +8,7 @@ import { logAudit } from "@/lib/audit";
 export async function POST(request: Request) {
   try {
     const ip = getClientIP(request);
-    const rl = rateLimit(`login:${ip}`, { limit: 5, windowMs: 60_000 });
+    const rl = await rateLimit(`login:${ip}`, { limit: 5, windowMs: 60_000 });
     if (!rl.success) {
       return NextResponse.json({ error: "Muitas tentativas. Aguarde 1 minuto." }, { status: 429 });
     }
@@ -16,7 +16,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     const parsed = loginSchema.safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json({ error: "Dados inválidos", details: parsed.error.flatten() }, { status: 400 });
+      return NextResponse.json({ error: "Dados invalidos" }, { status: 400 });
     }
 
     const { email, senha } = parsed.data;

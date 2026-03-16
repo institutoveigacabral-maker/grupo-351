@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getUserSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { companyUpdateSchema } from "@/lib/validations";
+import { cached, invalidate, invalidatePrefix, CACHE_KEYS } from "@/lib/cache";
 
 // GET — perfil público da empresa
 export async function GET(
@@ -9,32 +10,36 @@ export async function GET(
   { params }: { params: Promise<{ slug: string }> }
 ) {
   const { slug } = await params;
-  const company = await prisma.company.findUnique({
-    where: { slug, ativa: true },
-    select: {
-      id: true,
-      slug: true,
-      nome: true,
-      tagline: true,
-      descricao: true,
-      setor: true,
-      pais: true,
-      cidade: true,
-      website: true,
-      linkedin: true,
-      logo: true,
-      estagio: true,
-      interesses: true,
-      verificada: true,
-      criadoEm: true,
-      opportunities: {
-        where: { status: "aberta" },
-        select: { id: true, titulo: true, tipo: true, setor: true, budget: true, criadoEm: true },
-        orderBy: { criadoEm: "desc" },
-        take: 10,
+  const cacheKey = CACHE_KEYS.companyProfile(slug);
+
+  const company = await cached(cacheKey, async () => {
+    return prisma.company.findUnique({
+      where: { slug, ativa: true },
+      select: {
+        id: true,
+        slug: true,
+        nome: true,
+        tagline: true,
+        descricao: true,
+        setor: true,
+        pais: true,
+        cidade: true,
+        website: true,
+        linkedin: true,
+        logo: true,
+        estagio: true,
+        interesses: true,
+        verificada: true,
+        criadoEm: true,
+        opportunities: {
+          where: { status: "aberta" },
+          select: { id: true, titulo: true, tipo: true, setor: true, budget: true, criadoEm: true },
+          orderBy: { criadoEm: "desc" },
+          take: 10,
+        },
       },
-    },
-  });
+    });
+  }, 300);
 
   if (!company) {
     return NextResponse.json({ error: "Empresa não encontrada" }, { status: 404 });
@@ -68,13 +73,18 @@ export async function PATCH(
   }
   const parsed = companyUpdateSchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json({ error: "Dados inválidos", details: parsed.error.flatten() }, { status: 400 });
+    return NextResponse.json({ error: "Dados invalidos" }, { status: 400 });
   }
 
   const updated = await prisma.company.update({
     where: { slug },
     data: parsed.data,
   });
+
+  await Promise.all([
+    invalidate(CACHE_KEYS.companyProfile(slug)),
+    invalidatePrefix("public:companies:"),
+  ]);
 
   return NextResponse.json(updated);
 }

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getUserSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { cached } from "@/lib/cache";
 
 export async function GET() {
   const session = await getUserSession();
@@ -8,25 +9,33 @@ export async function GET() {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
 
-  const user = await prisma.user.findUnique({
-    where: { id: session.id },
-    include: {
-      company: {
-        select: { id: true, slug: true, nome: true, setor: true, estagio: true, verificada: true },
-      },
+  const user = await cached(
+    `user:${session.id}:me`,
+    async () => {
+      const u = await prisma.user.findUnique({
+        where: { id: session.id },
+        include: {
+          company: {
+            select: { id: true, slug: true, nome: true, setor: true, estagio: true, verificada: true },
+          },
+        },
+      });
+      if (!u) return null;
+      return {
+        id: u.id,
+        nome: u.nome,
+        email: u.email,
+        role: u.role,
+        avatar: u.avatar,
+        company: u.company,
+      };
     },
-  });
+    300 // 5 min cache
+  );
 
   if (!user) {
     return NextResponse.json({ error: "Usuário não encontrado" }, { status: 404 });
   }
 
-  return NextResponse.json({
-    id: user.id,
-    nome: user.nome,
-    email: user.email,
-    role: user.role,
-    avatar: user.avatar,
-    company: user.company,
-  });
+  return NextResponse.json(user);
 }

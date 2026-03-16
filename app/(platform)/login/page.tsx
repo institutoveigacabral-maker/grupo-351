@@ -76,8 +76,9 @@ function LoginForm() {
 
       <div className="space-y-4">
         <div>
-          <label className="block text-[11px] font-semibold text-white/40 mb-2 uppercase tracking-wider">Email</label>
+          <label htmlFor="login-email" className="block text-[11px] font-semibold text-white/40 mb-2 uppercase tracking-wider">Email</label>
           <input
+            id="login-email"
             type="email"
             className="w-full px-4 py-3.5 rounded-2xl border border-white/[0.06] bg-white/[0.03] text-white text-sm placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500/20 focus:bg-white/[0.05] transition-all"
             value={email}
@@ -88,9 +89,10 @@ function LoginForm() {
         </div>
 
         <div>
-          <label className="block text-[11px] font-semibold text-white/40 mb-2 uppercase tracking-wider">Senha</label>
+          <label htmlFor="login-senha" className="block text-[11px] font-semibold text-white/40 mb-2 uppercase tracking-wider">Senha</label>
           <div className="relative">
             <input
+              id="login-senha"
               type={showSenha ? "text" : "password"}
               className="w-full px-4 py-3.5 rounded-2xl border border-white/[0.06] bg-white/[0.03] text-white text-sm placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500/20 focus:bg-white/[0.05] transition-all pr-11"
               value={senha}

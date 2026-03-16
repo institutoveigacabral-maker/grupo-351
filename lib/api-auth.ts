@@ -7,6 +7,7 @@
  */
 
 import { prisma } from "./prisma";
+import { logger } from "./logger";
 import crypto from "crypto";
 
 export interface ApiKeyContext {
@@ -29,7 +30,7 @@ export async function validateApiKey(request: Request): Promise<ApiKeyContext | 
   prisma.apiKey.update({
     where: { id: apiKey.id },
     data: { ultimoUso: new Date() },
-  }).catch(() => {});
+  }).catch((err) => logger.warn("Failed to update API key ultimoUso", "api-auth", { error: String(err) }));
 
   return {
     userId: apiKey.userId,

@@ -8,7 +8,7 @@ import { createAdminNotification } from "@/lib/admin-notifications";
 
 export async function POST(request: Request) {
   const ip = getClientIP(request);
-  const rl = rateLimit(`register:${ip}`, { limit: 3, windowMs: 60_000 });
+  const rl = await rateLimit(`register:${ip}`, { limit: 3, windowMs: 60_000 });
   if (!rl.success) {
     return NextResponse.json({ error: "Muitas tentativas. Aguarde 1 minuto." }, { status: 429 });
   }
@@ -19,7 +19,7 @@ export async function POST(request: Request) {
   }
   const parsed = registerSchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json({ error: "Dados inválidos", details: parsed.error.flatten() }, { status: 400 });
+    return NextResponse.json({ error: "Dados invalidos" }, { status: 400 });
   }
 
   const { nome, email, senha, role } = parsed.data;

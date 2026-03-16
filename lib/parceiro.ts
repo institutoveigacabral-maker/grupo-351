@@ -1,4 +1,5 @@
 import { prisma } from "./prisma";
+import { logger } from "./logger";
 
 export interface ParceiroData {
   id: string;
@@ -31,7 +32,7 @@ export async function getParceiroByToken(token: string): Promise<ParceiroData | 
   await prisma.parceiro.update({
     where: { id: row.id },
     data: { ultimoAcesso: new Date() },
-  }).catch(() => {});
+  }).catch((err) => logger.warn("Failed to update parceiro ultimoAcesso", "parceiro", { error: String(err) }));
 
   return {
     id: row.id,

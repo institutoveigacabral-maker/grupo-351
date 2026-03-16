@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getUserSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
+import { logPlatformAudit } from "@/lib/audit";
 
 // POST — Delete user account and all associated data (RGPD Art. 17 — Direito ao apagamento)
 export async function POST(request: Request) {
@@ -54,6 +55,16 @@ export async function POST(request: Request) {
 
       // Delete the user
       await tx.user.delete({ where: { id: session.id } });
+    });
+
+    // Audit log before clearing session
+    await logPlatformAudit({
+      acao: "DELETE_ACCOUNT",
+      recurso: "user",
+      resourceId: session.id,
+      userId: session.id,
+      userNome: session.nome || "unknown",
+      detalhes: { reason: "RGPD Art. 17" },
     });
 
     // Clear session cookie

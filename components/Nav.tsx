@@ -29,6 +29,7 @@ export function Nav() {
 
   return (
     <motion.nav
+      aria-label="Navegacao principal"
       initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
@@ -52,6 +53,7 @@ export function Nav() {
               <a
                 key={l.href}
                 href={l.href}
+                aria-current={active ? "page" : undefined}
                 className={`relative px-4 py-2 rounded-full text-[13px] font-medium transition-all duration-300 ${
                   active
                     ? "text-primary"
@@ -90,7 +92,8 @@ export function Nav() {
         <button
           onClick={() => setOpen(!open)}
           className="md:hidden p-2 rounded-xl text-primary hover:bg-black/5 transition-all relative z-10"
-          aria-label="Menu"
+          aria-label="Menu de navegacao"
+          aria-expanded={open}
         >
           <AnimatePresence mode="wait">
             {open ? (

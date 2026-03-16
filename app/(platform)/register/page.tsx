@@ -91,8 +91,9 @@ export default function RegisterPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-[11px] font-semibold text-white/40 mb-2 uppercase tracking-wider">Nome completo</label>
+              <label htmlFor="reg-nome" className="block text-[11px] font-semibold text-white/40 mb-2 uppercase tracking-wider">Nome completo</label>
               <input
+                id="reg-nome"
                 type="text"
                 className={inputClass}
                 value={form.nome}
@@ -103,8 +104,9 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label className="block text-[11px] font-semibold text-white/40 mb-2 uppercase tracking-wider">Email</label>
+              <label htmlFor="reg-email" className="block text-[11px] font-semibold text-white/40 mb-2 uppercase tracking-wider">Email</label>
               <input
+                id="reg-email"
                 type="email"
                 className={inputClass}
                 value={form.email}
@@ -115,9 +117,10 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label className="block text-[11px] font-semibold text-white/40 mb-2 uppercase tracking-wider">Senha</label>
+              <label htmlFor="reg-senha" className="block text-[11px] font-semibold text-white/40 mb-2 uppercase tracking-wider">Senha</label>
               <div className="relative">
                 <input
+                  id="reg-senha"
                   type={showSenha ? "text" : "password"}
                   className={`${inputClass} pr-11`}
                   value={form.senha}

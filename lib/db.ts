@@ -1,4 +1,5 @@
 import { prisma } from "./prisma";
+import { logger } from "./logger";
 import type { Candidatura, Contato } from "./admin-types";
 import type { Projeto } from "./projetos";
 import type { Termo, Artigo } from "./conhecimento-types";
@@ -59,7 +60,8 @@ export async function updateCandidatura(
       data: safe,
     });
     return mapCandidatura(row);
-  } catch {
+  } catch (err) {
+    logger.error(`Failed to update candidatura ${id}`, "db", { error: String(err) });
     return null;
   }
 }
@@ -142,7 +144,8 @@ export async function updateContato(
       data: safe,
     });
     return mapContato(row);
-  } catch {
+  } catch (err) {
+    logger.error(`Failed to update contato ${id}`, "db", { error: String(err) });
     return null;
   }
 }
@@ -211,7 +214,8 @@ export async function updateProjeto(
       },
     });
     return mapProjeto(row);
-  } catch {
+  } catch (err) {
+    logger.error(`Failed to update projeto ${slug}`, "db", { error: String(err) });
     return null;
   }
 }
@@ -220,7 +224,8 @@ export async function deleteProjeto(slug: string): Promise<boolean> {
   try {
     await prisma.projeto.delete({ where: { slug } });
     return true;
-  } catch {
+  } catch (err) {
+    logger.error(`Failed to delete projeto ${slug}`, "db", { error: String(err) });
     return false;
   }
 }
@@ -250,20 +255,24 @@ function mapProjeto(row: Record<string, unknown>): Projeto {
 /* ─── Glossário ─── */
 
 export async function getGlossarioDb(): Promise<Termo[]> {
-  return prisma.termo.findMany() as unknown as Promise<Termo[]>;
+  const rows = await prisma.termo.findMany();
+  return rows as Termo[];
 }
 
 export async function addTermo(data: Termo): Promise<Termo> {
-  return prisma.termo.create({ data }) as unknown as Promise<Termo>;
+  const row = await prisma.termo.create({ data });
+  return row as Termo;
 }
 
 export async function updateTermo(slug: string, updates: Partial<Termo>): Promise<Termo | null> {
   try {
-    return (await prisma.termo.update({
+    const row = await prisma.termo.update({
       where: { slug },
       data: updates,
-    })) as unknown as Termo;
-  } catch {
+    });
+    return row as Termo;
+  } catch (err) {
+    logger.error(`Failed to update termo ${slug}`, "db", { error: String(err) });
     return null;
   }
 }
@@ -272,7 +281,8 @@ export async function deleteTermo(slug: string): Promise<boolean> {
   try {
     await prisma.termo.delete({ where: { slug } });
     return true;
-  } catch {
+  } catch (err) {
+    logger.error(`Failed to delete termo ${slug}`, "db", { error: String(err) });
     return false;
   }
 }
@@ -280,20 +290,24 @@ export async function deleteTermo(slug: string): Promise<boolean> {
 /* ─── Artigos ─── */
 
 export async function getArtigosDb(): Promise<Artigo[]> {
-  return prisma.artigo.findMany() as unknown as Promise<Artigo[]>;
+  const rows = await prisma.artigo.findMany();
+  return rows as Artigo[];
 }
 
 export async function addArtigo(data: Artigo): Promise<Artigo> {
-  return prisma.artigo.create({ data }) as unknown as Promise<Artigo>;
+  const row = await prisma.artigo.create({ data });
+  return row as Artigo;
 }
 
 export async function updateArtigo(slug: string, updates: Partial<Artigo>): Promise<Artigo | null> {
   try {
-    return (await prisma.artigo.update({
+    const row = await prisma.artigo.update({
       where: { slug },
       data: updates,
-    })) as unknown as Artigo;
-  } catch {
+    });
+    return row as Artigo;
+  } catch (err) {
+    logger.error(`Failed to update artigo ${slug}`, "db", { error: String(err) });
     return null;
   }
 }
@@ -302,7 +316,8 @@ export async function deleteArtigo(slug: string): Promise<boolean> {
   try {
     await prisma.artigo.delete({ where: { slug } });
     return true;
-  } catch {
+  } catch (err) {
+    logger.error(`Failed to delete artigo ${slug}`, "db", { error: String(err) });
     return false;
   }
 }

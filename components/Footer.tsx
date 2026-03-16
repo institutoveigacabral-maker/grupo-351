@@ -15,7 +15,7 @@ export function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="bg-[#111d2e] text-white">
+    <footer className="bg-[#111d2e] text-white" role="contentinfo">
       <div className="max-w-6xl mx-auto px-6 py-16">
         <div className="grid md:grid-cols-3 gap-12">
           {/* Brand */}

@@ -4,7 +4,7 @@ import { Building2, MapPin, Globe, Linkedin, CheckCircle2, Lightbulb, Calendar, 
 import Link from "next/link";
 import type { Metadata } from "next";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600; // ISR: 1 hora
 
 interface Props {
   params: Promise<{ slug: string }>;

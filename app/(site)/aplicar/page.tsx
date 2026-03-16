@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     "Candidate-se a uma Joint Venture com o Grupo +351. Formulário estruturado para operadores, investidores e parceiros estratégicos.",
 };
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600; // ISR: 1 hora
 
 export default async function Aplicar() {
   const projetos = await getProjetos();

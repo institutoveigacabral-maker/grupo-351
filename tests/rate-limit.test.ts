@@ -3,54 +3,54 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import { rateLimit, getClientIP } from "@/lib/rate-limit";
 
 describe("rateLimit", () => {
-  it("allows first request", () => {
-    const result = rateLimit("test-fresh-1", { limit: 5, windowMs: 60000 });
+  it("allows first request", async () => {
+    const result = await rateLimit("test-fresh-1", { limit: 5, windowMs: 60000 });
     expect(result.success).toBe(true);
     expect(result.remaining).toBe(4);
   });
 
-  it("decrements remaining on successive calls", () => {
+  it("decrements remaining on successive calls", async () => {
     const key = "test-decrement-" + Date.now();
-    rateLimit(key, { limit: 5, windowMs: 60000 });
-    const second = rateLimit(key, { limit: 5, windowMs: 60000 });
+    await rateLimit(key, { limit: 5, windowMs: 60000 });
+    const second = await rateLimit(key, { limit: 5, windowMs: 60000 });
     expect(second.remaining).toBe(3);
   });
 
-  it("blocks after limit is exceeded", () => {
+  it("blocks after limit is exceeded", async () => {
     const key = "test-block-" + Date.now();
     for (let i = 0; i < 3; i++) {
-      rateLimit(key, { limit: 3, windowMs: 60000 });
+      await rateLimit(key, { limit: 3, windowMs: 60000 });
     }
-    const result = rateLimit(key, { limit: 3, windowMs: 60000 });
+    const result = await rateLimit(key, { limit: 3, windowMs: 60000 });
     expect(result.success).toBe(false);
     expect(result.remaining).toBe(0);
   });
 
-  it("uses default limit of 10", () => {
+  it("uses default limit of 10", async () => {
     const key = "test-default-" + Date.now();
-    const result = rateLimit(key);
+    const result = await rateLimit(key);
     expect(result.remaining).toBe(9);
   });
 
   it("resets after window expires", async () => {
     const key = "test-expire-" + Date.now();
     // Use a tiny window of 10ms
-    rateLimit(key, { limit: 1, windowMs: 10 });
+    await rateLimit(key, { limit: 1, windowMs: 10 });
     // Wait for window to expire
     await new Promise((resolve) => setTimeout(resolve, 20));
     // After window expires, should allow again
-    const result = rateLimit(key, { limit: 1, windowMs: 10 });
+    const result = await rateLimit(key, { limit: 1, windowMs: 10 });
     expect(result.success).toBe(true);
   });
 
-  it("uses different windows for different keys", () => {
+  it("uses different windows for different keys", async () => {
     const key1 = "test-key1-" + Date.now();
     const key2 = "test-key2-" + Date.now();
     for (let i = 0; i < 3; i++) {
-      rateLimit(key1, { limit: 3, windowMs: 60000 });
+      await rateLimit(key1, { limit: 3, windowMs: 60000 });
     }
-    const blocked = rateLimit(key1, { limit: 3, windowMs: 60000 });
-    const allowed = rateLimit(key2, { limit: 3, windowMs: 60000 });
+    const blocked = await rateLimit(key1, { limit: 3, windowMs: 60000 });
+    const allowed = await rateLimit(key2, { limit: 3, windowMs: 60000 });
     expect(blocked.success).toBe(false);
     expect(allowed.success).toBe(true);
   });

@@ -5,7 +5,7 @@ import { rateLimit, getClientIP } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
   const ip = getClientIP(request);
-  const rl = rateLimit(`platform-login:${ip}`, { limit: 5, windowMs: 60_000 });
+  const rl = await rateLimit(`platform-login:${ip}`, { limit: 5, windowMs: 60_000 });
   if (!rl.success) {
     return NextResponse.json({ error: "Muitas tentativas. Aguarde 1 minuto." }, { status: 429 });
   }

@@ -78,6 +78,7 @@ export function OnboardingTour({ hasCompany, hasOpportunity }: OnboardingTourPro
       <button
         onClick={dismiss}
         className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 transition-colors"
+        aria-label="Fechar guia de primeiros passos"
       >
         <X className="w-4 h-4" />
       </button>
@@ -88,7 +89,14 @@ export function OnboardingTour({ hasCompany, hasOpportunity }: OnboardingTourPro
           Complete estes passos para aproveitar ao máximo a plataforma.
         </p>
         <div className="flex items-center gap-2 mt-3">
-          <div className="flex-1 h-1.5 bg-amber-200/50 rounded-full overflow-hidden">
+          <div
+            className="flex-1 h-1.5 bg-amber-200/50 rounded-full overflow-hidden"
+            role="progressbar"
+            aria-valuenow={progress}
+            aria-valuemin={0}
+            aria-valuemax={total}
+            aria-label={`Progresso: ${progress} de ${total} passos concluidos`}
+          >
             <div
               className="h-full bg-amber-500 rounded-full transition-all duration-500"
               style={{ width: `${(progress / total) * 100}%` }}

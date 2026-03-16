@@ -1,4 +1,5 @@
 import { prisma } from "./prisma";
+import { logger } from "./logger";
 
 export async function createUserNotification(data: {
   userId: string;
@@ -17,8 +18,8 @@ export async function createUserNotification(data: {
         link: data.link || null,
       },
     });
-  } catch {
-    console.error("[user-notifications] Failed to create:", data);
+  } catch (err) {
+    logger.error(`Failed to create notification for ${data.userId}`, "notifications", { error: String(err), tipo: data.tipo });
   }
 }
 
@@ -36,7 +37,7 @@ export async function createUserNotificationBulk(
         link: data.link || null,
       })),
     });
-  } catch {
-    console.error("[user-notifications] Bulk create failed:", data);
+  } catch (err) {
+    logger.error(`Bulk notification create failed (${userIds.length} users)`, "notifications", { error: String(err), tipo: data.tipo });
   }
 }

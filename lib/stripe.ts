@@ -178,11 +178,35 @@ export async function handleWebhookEvent(
 
   const event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
 
+  // Idempotency check — prevent duplicate processing
+  const existing = await prisma.stripeEvent.findUnique({
+    where: { eventId: event.id },
+  });
+  if (existing) return; // Already processed
+
+  // Record event before processing (prevents re-entry on crash)
+  await prisma.stripeEvent.create({
+    data: { eventId: event.id, type: event.type },
+  });
+
   switch (event.type) {
     case "checkout.session.completed": {
       const session = event.data.object as Stripe.Checkout.Session;
-      const { companyId, planId } = session.metadata || {};
-      if (!companyId || !planId) break;
+      const companyId = session.metadata?.companyId;
+      const planId = session.metadata?.planId;
+
+      if (!companyId || !planId) {
+        console.warn("[stripe] checkout.session.completed missing metadata", { eventId: event.id });
+        break;
+      }
+
+      const customerId = session.customer as string | null;
+      const subscriptionId = session.subscription as string | null;
+
+      if (!customerId || !subscriptionId) {
+        console.warn("[stripe] checkout.session.completed missing customer/subscription", { eventId: event.id });
+        break;
+      }
 
       await prisma.subscription.upsert({
         where: { companyId },
@@ -190,25 +214,26 @@ export async function handleWebhookEvent(
           companyId,
           plano: planId,
           status: "active",
-          stripeCustomerId: session.customer as string,
-          stripeSubscriptionId: session.subscription as string,
+          stripeCustomerId: customerId,
+          stripeSubscriptionId: subscriptionId,
         },
         update: {
           plano: planId,
           status: "active",
-          stripeCustomerId: session.customer as string,
-          stripeSubscriptionId: session.subscription as string,
+          stripeCustomerId: customerId,
+          stripeSubscriptionId: subscriptionId,
         },
       });
 
+      const paymentIntentId = session.payment_intent as string | null;
       await prisma.payment.create({
         data: {
-          amount: session.amount_total || 0,
+          amount: session.amount_total ?? 0,
           currency: session.currency || "eur",
           status: "succeeded",
           tipo: "subscription",
           descricao: `Plano ${planId}`,
-          stripePaymentId: session.payment_intent as string,
+          stripePaymentId: paymentIntentId,
           companyId,
         },
       });
@@ -217,17 +242,16 @@ export async function handleWebhookEvent(
 
     case "customer.subscription.updated": {
       const sub = event.data.object as Stripe.Subscription;
-      const existing = await prisma.subscription.findUnique({
+      const record = await prisma.subscription.findUnique({
         where: { stripeSubscriptionId: sub.id },
       });
-      if (existing) {
-        // Stripe v20 removed current_period_end from types; use cancel_at or billing_cycle_anchor
+      if (record) {
         const periodEnd = sub.cancel_at
           ? new Date(sub.cancel_at * 1000)
           : null;
 
         await prisma.subscription.update({
-          where: { id: existing.id },
+          where: { id: record.id },
           data: {
             status: ["active", "trialing"].includes(sub.status) ? "active" : sub.status === "past_due" ? "past_due" : "canceled",
             ...(periodEnd && { currentPeriodEnd: periodEnd }),
@@ -240,12 +264,12 @@ export async function handleWebhookEvent(
 
     case "customer.subscription.deleted": {
       const sub = event.data.object as Stripe.Subscription;
-      const existing = await prisma.subscription.findUnique({
+      const record = await prisma.subscription.findUnique({
         where: { stripeSubscriptionId: sub.id },
       });
-      if (existing) {
+      if (record) {
         await prisma.subscription.update({
-          where: { id: existing.id },
+          where: { id: record.id },
           data: { status: "canceled", plano: "free" },
         });
       }

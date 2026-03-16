@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getUserSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { opportunityUpdateSchema } from "@/lib/validations";
+import { invalidatePrefix } from "@/lib/cache";
 
 // GET — detalhe de uma oportunidade
 export async function GET(
@@ -48,7 +49,7 @@ export async function PUT(
 
   const parsed = opportunityUpdateSchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json({ error: "Dados inválidos", details: parsed.error.flatten() }, { status: 400 });
+    return NextResponse.json({ error: "Dados invalidos" }, { status: 400 });
   }
 
   const data: Record<string, unknown> = { ...parsed.data };
@@ -58,6 +59,8 @@ export async function PUT(
     where: { id },
     data: data as never,
   });
+
+  await invalidatePrefix("public:opportunities:");
 
   return NextResponse.json(updated);
 }
@@ -80,6 +83,8 @@ export async function DELETE(
     where: { id },
     data: { status: "cancelada" },
   });
+
+  await invalidatePrefix("public:opportunities:");
 
   return NextResponse.json({ message: "Oportunidade cancelada" });
 }

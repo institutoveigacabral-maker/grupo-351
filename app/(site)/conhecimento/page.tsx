@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     "Glossário FIGITAL, artigos sobre o modelo de negócio e guias sobre joint ventures do Grupo +351.",
 };
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600; // ISR: 1 hora
 
 export default async function Conhecimento() {
   const [glossario, artigos] = await Promise.all([

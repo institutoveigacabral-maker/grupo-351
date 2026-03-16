@@ -55,7 +55,7 @@ export async function POST(request: Request) {
 
   const parsed = documentSchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json({ error: "Dados inválidos", details: parsed.error.flatten() }, { status: 400 });
+    return NextResponse.json({ error: "Dados invalidos" }, { status: 400 });
   }
 
   const doc = await prisma.document.create({

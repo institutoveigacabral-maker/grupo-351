@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Search, ArrowRight, BadgeCheck, XCircle, Building2 } from "lucide-react";
+import Image from "next/image";
 
 interface AdminCompany {
   id: string;
@@ -169,7 +170,7 @@ export default function EmpresasPage() {
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-3">
                         {c.logo ? (
-                          <img src={c.logo} alt="" className="w-8 h-8 rounded-lg object-cover" />
+                          <Image src={c.logo} alt={`Logo de ${c.nome}`} width={32} height={32} className="w-8 h-8 rounded-lg object-cover" />
                         ) : (
                           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
                             <Building2 className="w-4 h-4 text-primary/60" />

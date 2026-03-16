@@ -97,12 +97,12 @@ describe("Register route logic", () => {
 
     // Should allow first 3
     for (let i = 0; i < 3; i++) {
-      const result = rateLimit(key, { limit: 3, windowMs: 60000 });
+      const result = await rateLimit(key, { limit: 3, windowMs: 60000 });
       expect(result.success).toBe(true);
     }
 
     // 4th should be blocked
-    const result = rateLimit(key, { limit: 3, windowMs: 60000 });
+    const result = await rateLimit(key, { limit: 3, windowMs: 60000 });
     expect(result.success).toBe(false);
   });
 });

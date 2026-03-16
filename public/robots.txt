@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api/admin
+Disallow: /dashboard
+Disallow: /api/platform
+Disallow: /convite
+
+Sitemap: https://grupo351.com/sitemap.xml

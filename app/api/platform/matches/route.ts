@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getUserSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { cached, invalidate, CACHE_KEYS } from "@/lib/cache";
 
 // GET — meus matches (recebidos + enviados)
 export async function GET() {
@@ -9,28 +10,32 @@ export async function GET() {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
 
-  const matches = await prisma.match.findMany({
-    where: {
-      OR: [{ fromUserId: session.id }, { toUserId: session.id }],
-    },
-    select: {
-      id: true,
-      status: true,
-      score: true,
-      motivo: true,
-      criadoEm: true,
-      opportunity: {
-        select: { id: true, titulo: true, tipo: true },
+  const matches = await cached(
+    CACHE_KEYS.matches(session.id),
+    () => prisma.match.findMany({
+      where: {
+        OR: [{ fromUserId: session.id }, { toUserId: session.id }],
       },
-      fromUser: {
-        select: { id: true, nome: true },
+      select: {
+        id: true,
+        status: true,
+        score: true,
+        motivo: true,
+        criadoEm: true,
+        opportunity: {
+          select: { id: true, titulo: true, tipo: true },
+        },
+        fromUser: {
+          select: { id: true, nome: true },
+        },
+        toUser: {
+          select: { id: true, nome: true },
+        },
       },
-      toUser: {
-        select: { id: true, nome: true },
-      },
-    },
-    orderBy: { criadoEm: "desc" },
-  });
+      orderBy: { criadoEm: "desc" },
+    }),
+    120
+  );
 
   return NextResponse.json(matches);
 }
@@ -73,6 +78,12 @@ export async function POST(request: Request) {
     where: { id: matchId },
     data: { status: newStatus },
   });
+
+  // Invalidate cache for both parties
+  await invalidate(
+    CACHE_KEYS.matches(match.fromUserId),
+    CACHE_KEYS.matches(match.toUserId)
+  );
 
   return NextResponse.json(updated);
 }

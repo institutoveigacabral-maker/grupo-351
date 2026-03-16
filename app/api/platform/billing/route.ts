@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getUserSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { cached, invalidate, CACHE_KEYS } from "@/lib/cache";
 import { createCheckoutSession, createBillingPortalSession, PLANS, getCompanyPlan } from "@/lib/stripe";
 
 // GET — plano atual + planos disponíveis
@@ -12,26 +13,42 @@ export async function GET() {
 
   const company = await prisma.company.findUnique({
     where: { ownerId: session.id },
-    include: { subscription: true },
+    select: { id: true },
   });
 
   if (!company) {
     return NextResponse.json({ error: "Crie uma empresa primeiro" }, { status: 403 });
   }
 
-  const currentPlan = await getCompanyPlan(company.id);
+  const data = await cached(
+    CACHE_KEYS.billing(company.id),
+    async () => {
+      const c = await prisma.company.findUnique({
+        where: { id: company.id },
+        include: { subscription: true },
+      });
+      if (!c) return null;
+      const currentPlan = await getCompanyPlan(c.id);
+      return {
+        currentPlan: currentPlan.id,
+        subscription: c.subscription
+          ? {
+              status: c.subscription.status,
+              currentPeriodEnd: c.subscription.currentPeriodEnd,
+              cancelAtPeriodEnd: c.subscription.cancelAtPeriodEnd,
+            }
+          : null,
+        plans: Object.values(PLANS),
+      };
+    },
+    600
+  );
 
-  return NextResponse.json({
-    currentPlan: currentPlan.id,
-    subscription: company.subscription
-      ? {
-          status: company.subscription.status,
-          currentPeriodEnd: company.subscription.currentPeriodEnd,
-          cancelAtPeriodEnd: company.subscription.cancelAtPeriodEnd,
-        }
-      : null,
-    plans: Object.values(PLANS),
-  });
+  if (!data) {
+    return NextResponse.json({ error: "Crie uma empresa primeiro" }, { status: 403 });
+  }
+
+  return NextResponse.json(data);
 }
 
 // POST — criar checkout session ou abrir billing portal

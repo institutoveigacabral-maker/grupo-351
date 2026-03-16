@@ -1,24 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Building2, Save, CheckCircle } from "lucide-react";
 import { PageHeader } from "@/components/ui/page-header";
 import { SkeletonPage } from "@/components/ui/skeleton";
-
-interface CompanyData {
-  slug: string;
-  nome: string;
-  tagline?: string;
-  descricao?: string;
-  setor: string;
-  pais: string;
-  cidade?: string;
-  website?: string;
-  linkedin?: string;
-  estagio: string;
-  faturamento?: string;
-  interesses: string[];
-}
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select } from "@/components/ui/select";
+import { Card } from "@/components/ui/card";
+import { FormField } from "@/components/ui/form-field";
+import { useMe } from "@/hooks/queries";
+import { api, ApiError, type Company } from "@/lib/api-client";
 
 const estagios = [
   { value: "ideacao", label: "Ideacao" },
@@ -42,48 +36,48 @@ const interesseOptions = [
 ];
 
 export default function EmpresaPage() {
-  const [company, setCompany] = useState<CompanyData | null>(null);
-  const [isNew, setIsNew] = useState(false);
-  const [form, setForm] = useState({
+  const { data: me, isLoading: meLoading } = useMe();
+  const qc = useQueryClient();
+
+  const companySlug = me?.company?.slug;
+  const { data: company, isLoading: companyLoading } = useQuery({
+    queryKey: ["company", companySlug],
+    queryFn: () => api.company(companySlug!),
+    enabled: !!companySlug,
+    staleTime: 5 * 60_000,
+  });
+
+  const isNew = !meLoading && !companySlug;
+  const loading = meLoading || (!!companySlug && companyLoading);
+
+  const [form, setForm] = useState<{
+    nome: string; slug: string; tagline: string; descricao: string;
+    setor: string; pais: string; cidade: string; website: string;
+    linkedin: string; estagio: string; faturamento: string; interesses: string[];
+  } | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [error, setError] = useState("");
+
+  // Initialize form from fetched company (or defaults for new)
+  const formData = form ?? (company ? {
+    nome: company.nome, slug: company.slug, tagline: company.tagline || "",
+    descricao: company.descricao || "", setor: company.setor, pais: company.pais,
+    cidade: company.cidade || "", website: company.website || "",
+    linkedin: company.linkedin || "", estagio: company.estagio,
+    faturamento: company.faturamento || "", interesses: company.interesses || [],
+  } : {
     nome: "", slug: "", tagline: "", descricao: "", setor: "", pais: "Portugal",
     cidade: "", website: "", linkedin: "", estagio: "operando", faturamento: "",
     interesses: [] as string[],
   });
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch("/api/platform/me")
-      .then((r) => { if (!r.ok) throw new Error(); return r.json(); })
-      .then(async (u) => {
-        if (u.company) {
-          const r = await fetch(`/api/platform/companies/${u.company.slug}`);
-          if (!r.ok) throw new Error();
-          const c = await r.json();
-          setCompany(c);
-          setForm({
-            nome: c.nome, slug: c.slug, tagline: c.tagline || "",
-            descricao: c.descricao || "", setor: c.setor, pais: c.pais,
-            cidade: c.cidade || "", website: c.website || "",
-            linkedin: c.linkedin || "", estagio: c.estagio,
-            faturamento: c.faturamento || "", interesses: c.interesses || [],
-          });
-        } else {
-          setIsNew(true);
-        }
-      })
-      .catch(() => { setIsNew(true); })
-      .finally(() => setLoading(false));
-  }, []);
 
   function set(field: string, value: string | string[]) {
-    setForm((prev) => ({ ...prev, [field]: value }));
+    setForm((prev) => ({ ...(prev ?? formData), [field]: value }));
   }
 
   function toggleInteresse(tag: string) {
-    const current = form.interesses;
+    const current = formData.interesses;
     set("interesses", current.includes(tag) ? current.filter((t) => t !== tag) : [...current, tag]);
   }
 
@@ -102,44 +96,24 @@ export default function EmpresaPage() {
 
     try {
       if (isNew) {
-        const res = await fetch("/api/platform/companies", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...form, slug: form.slug || autoSlug(form.nome) }),
-        });
-        if (!res.ok) {
-          const data = await res.json();
-          setError(data.error || "Erro ao criar empresa");
-          return;
-        }
-        const created = await res.json();
-        setCompany(created);
-        setIsNew(false);
+        await api.createCompany({ ...formData, slug: formData.slug || autoSlug(formData.nome) });
+        qc.invalidateQueries({ queryKey: ["me"] });
       } else if (company) {
-        const { slug: _, ...updates } = form;
-        const res = await fetch(`/api/platform/companies/${company.slug}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(updates),
-        });
-        if (!res.ok) {
-          const data = await res.json();
-          setError(data.error || "Erro ao atualizar");
-          return;
-        }
+        const { slug: _slug, ...updates } = formData;
+        await api.updateCompany(company.slug, updates);
+        qc.invalidateQueries({ queryKey: ["company", company.slug] });
       }
 
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Erro ao salvar");
     } finally {
       setSaving(false);
     }
   }
 
   if (loading) return <SkeletonPage />;
-
-  const inputClass =
-    "w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-300 transition-all placeholder:text-gray-300";
 
   return (
     <div className="max-w-2xl space-y-6">
@@ -149,172 +123,165 @@ export default function EmpresaPage() {
         description={isNew ? "Registre sua empresa para acessar o ecossistema" : "Gerencie informacoes publicas"}
       />
 
-      <div className="bg-white rounded-2xl border border-black/[0.04] p-6 space-y-5 shadow-sm">
-        {/* Nome e Slug */}
-        <div className="grid md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Nome da empresa *</label>
-            <input
-              className={inputClass}
-              value={form.nome}
-              onChange={(e) => {
-                set("nome", e.target.value);
-                if (isNew) set("slug", autoSlug(e.target.value));
-              }}
-              placeholder="Minha Empresa"
+      <Card padding="lg">
+        <div className="space-y-5">
+          {/* Nome e Slug */}
+          <div className="grid md:grid-cols-2 gap-4">
+            <FormField label="Nome da empresa" htmlFor="nome" required>
+              <Input
+                id="nome"
+                value={formData.nome}
+                onChange={(e) => {
+                  set("nome", e.target.value);
+                  if (isNew) set("slug", autoSlug(e.target.value));
+                }}
+                placeholder="Minha Empresa"
+                aria-required="true"
+              />
+            </FormField>
+            <FormField label="Slug (URL)" htmlFor="slug" required>
+              <Input
+                id="slug"
+                value={formData.slug}
+                onChange={(e) => set("slug", e.target.value)}
+                placeholder="minha-empresa"
+                disabled={!isNew}
+                aria-required="true"
+              />
+            </FormField>
+          </div>
+
+          {/* Tagline */}
+          <FormField label="Tagline" htmlFor="tagline">
+            <Input
+              id="tagline"
+              value={formData.tagline}
+              onChange={(e) => set("tagline", e.target.value)}
+              placeholder="Frase curta sobre a empresa"
             />
-          </div>
-          <div>
-            <label className="block text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Slug (URL) *</label>
-            <input
-              className={inputClass}
-              value={form.slug}
-              onChange={(e) => set("slug", e.target.value)}
-              placeholder="minha-empresa"
-              disabled={!isNew}
+          </FormField>
+
+          {/* Descricao */}
+          <FormField label="Descricao" htmlFor="descricao">
+            <Textarea
+              id="descricao"
+              rows={3}
+              value={formData.descricao}
+              onChange={(e) => set("descricao", e.target.value)}
+              placeholder="Conte sobre sua empresa, mercado e objetivos"
             />
+          </FormField>
+
+          {/* Divisor */}
+          <div className="border-t border-gray-100 pt-5">
+            <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-4">Informacoes do negocio</p>
+          </div>
+
+          {/* Setor, Pais, Cidade */}
+          <div className="grid md:grid-cols-3 gap-4">
+            <FormField label="Setor" htmlFor="setor" required>
+              <Input
+                id="setor"
+                value={formData.setor}
+                onChange={(e) => set("setor", e.target.value)}
+                placeholder="Foodtech, SaaS..."
+                aria-required="true"
+              />
+            </FormField>
+            <FormField label="Pais" htmlFor="pais" required>
+              <Input
+                id="pais"
+                value={formData.pais}
+                onChange={(e) => set("pais", e.target.value)}
+                aria-required="true"
+              />
+            </FormField>
+            <FormField label="Cidade" htmlFor="cidade">
+              <Input
+                id="cidade"
+                value={formData.cidade}
+                onChange={(e) => set("cidade", e.target.value)}
+                placeholder="Lisboa, Cascais..."
+              />
+            </FormField>
+          </div>
+
+          {/* Website e LinkedIn */}
+          <div className="grid md:grid-cols-2 gap-4">
+            <FormField label="Website" htmlFor="website">
+              <Input
+                id="website"
+                value={formData.website}
+                onChange={(e) => set("website", e.target.value)}
+                placeholder="https://..."
+              />
+            </FormField>
+            <FormField label="LinkedIn" htmlFor="linkedin">
+              <Input
+                id="linkedin"
+                value={formData.linkedin}
+                onChange={(e) => set("linkedin", e.target.value)}
+                placeholder="https://linkedin.com/company/..."
+              />
+            </FormField>
+          </div>
+
+          {/* Estagio e Faturamento */}
+          <div className="grid md:grid-cols-2 gap-4">
+            <FormField label="Estagio" htmlFor="estagio">
+              <Select id="estagio" value={formData.estagio} onChange={(e) => set("estagio", e.target.value)}>
+                {estagios.map((e) => <option key={e.value} value={e.value}>{e.label}</option>)}
+              </Select>
+            </FormField>
+            <FormField label="Faturamento anual" htmlFor="faturamento">
+              <Select id="faturamento" value={formData.faturamento} onChange={(e) => set("faturamento", e.target.value)}>
+                <option value="">Prefiro nao informar</option>
+                {faixas.map((f) => <option key={f.value} value={f.value}>{f.label}</option>)}
+              </Select>
+            </FormField>
+          </div>
+
+          {/* Interesses */}
+          <FormField label="Interesses">
+            <div className="flex flex-wrap gap-2" role="group" aria-label="Selecione seus interesses">
+              {interesseOptions.map((tag) => (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={() => toggleInteresse(tag)}
+                  aria-pressed={formData.interesses.includes(tag)}
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-all ${
+                    formData.interesses.includes(tag)
+                      ? "bg-amber-100 text-amber-700 ring-1 ring-amber-200 shadow-sm"
+                      : "bg-gray-50 text-gray-500 ring-1 ring-gray-100 hover:bg-gray-100 hover:ring-gray-200"
+                  }`}
+                >
+                  {tag}
+                </button>
+              ))}
+            </div>
+          </FormField>
+
+          {error && (
+            <div className="bg-red-50 border border-red-100 rounded-xl px-4 py-3" role="alert">
+              <p className="text-red-600 text-sm">{error}</p>
+            </div>
+          )}
+
+          <div className="pt-2">
+            <Button
+              onClick={handleSave}
+              disabled={saving || !formData.nome || !formData.setor || !formData.pais}
+              loading={saving}
+              variant={saved ? "success" : "primary"}
+              size="lg"
+            >
+              {saved ? <CheckCircle className="w-4 h-4" /> : <Save className="w-4 h-4" />}
+              {saved ? "Salvo" : isNew ? "Criar empresa" : "Salvar alteracoes"}
+            </Button>
           </div>
         </div>
-
-        {/* Tagline */}
-        <div>
-          <label className="block text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Tagline</label>
-          <input
-            className={inputClass}
-            value={form.tagline}
-            onChange={(e) => set("tagline", e.target.value)}
-            placeholder="Frase curta sobre a empresa"
-          />
-        </div>
-
-        {/* Descricao */}
-        <div>
-          <label className="block text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Descricao</label>
-          <textarea
-            className={`${inputClass} resize-none`}
-            rows={3}
-            value={form.descricao}
-            onChange={(e) => set("descricao", e.target.value)}
-            placeholder="Conte sobre sua empresa, mercado e objetivos"
-          />
-        </div>
-
-        {/* Divisor */}
-        <div className="border-t border-gray-100 pt-5">
-          <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-4">Informacoes do negocio</p>
-        </div>
-
-        {/* Setor, Pais, Cidade */}
-        <div className="grid md:grid-cols-3 gap-4">
-          <div>
-            <label className="block text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Setor *</label>
-            <input
-              className={inputClass}
-              value={form.setor}
-              onChange={(e) => set("setor", e.target.value)}
-              placeholder="Foodtech, SaaS..."
-            />
-          </div>
-          <div>
-            <label className="block text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Pais *</label>
-            <input
-              className={inputClass}
-              value={form.pais}
-              onChange={(e) => set("pais", e.target.value)}
-            />
-          </div>
-          <div>
-            <label className="block text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Cidade</label>
-            <input
-              className={inputClass}
-              value={form.cidade}
-              onChange={(e) => set("cidade", e.target.value)}
-              placeholder="Lisboa, Cascais..."
-            />
-          </div>
-        </div>
-
-        {/* Website e LinkedIn */}
-        <div className="grid md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Website</label>
-            <input
-              className={inputClass}
-              value={form.website}
-              onChange={(e) => set("website", e.target.value)}
-              placeholder="https://..."
-            />
-          </div>
-          <div>
-            <label className="block text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">LinkedIn</label>
-            <input
-              className={inputClass}
-              value={form.linkedin}
-              onChange={(e) => set("linkedin", e.target.value)}
-              placeholder="https://linkedin.com/company/..."
-            />
-          </div>
-        </div>
-
-        {/* Estagio e Faturamento */}
-        <div className="grid md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Estagio</label>
-            <select className={inputClass} value={form.estagio} onChange={(e) => set("estagio", e.target.value)}>
-              {estagios.map((e) => <option key={e.value} value={e.value}>{e.label}</option>)}
-            </select>
-          </div>
-          <div>
-            <label className="block text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Faturamento anual</label>
-            <select className={inputClass} value={form.faturamento} onChange={(e) => set("faturamento", e.target.value)}>
-              <option value="">Prefiro nao informar</option>
-              {faixas.map((f) => <option key={f.value} value={f.value}>{f.label}</option>)}
-            </select>
-          </div>
-        </div>
-
-        {/* Interesses */}
-        <div>
-          <label className="block text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2.5">Interesses</label>
-          <div className="flex flex-wrap gap-2">
-            {interesseOptions.map((tag) => (
-              <button
-                key={tag}
-                type="button"
-                onClick={() => toggleInteresse(tag)}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-all ${
-                  form.interesses.includes(tag)
-                    ? "bg-amber-100 text-amber-700 ring-1 ring-amber-200 shadow-sm"
-                    : "bg-gray-50 text-gray-500 ring-1 ring-gray-100 hover:bg-gray-100 hover:ring-gray-200"
-                }`}
-              >
-                {tag}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {error && (
-          <div className="bg-red-50 border border-red-100 rounded-xl px-4 py-3">
-            <p className="text-red-600 text-sm">{error}</p>
-          </div>
-        )}
-
-        <div className="pt-2">
-          <button
-            onClick={handleSave}
-            disabled={saving || !form.nome || !form.setor || !form.pais}
-            className={`inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-medium transition-all disabled:opacity-50 ${
-              saved
-                ? "bg-emerald-500 text-white"
-                : "bg-gradient-to-r from-amber-600 to-amber-500 text-white hover:shadow-lg hover:shadow-amber-500/20"
-            }`}
-          >
-            {saved ? <CheckCircle className="w-4 h-4" /> : <Save className="w-4 h-4" />}
-            {saving ? "Salvando..." : saved ? "Salvo" : isNew ? "Criar empresa" : "Salvar alteracoes"}
-          </button>
-        </div>
-      </div>
+      </Card>
     </div>
   );
 }

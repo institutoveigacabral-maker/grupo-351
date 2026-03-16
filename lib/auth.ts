@@ -1,5 +1,7 @@
 import { cookies } from "next/headers";
 import { prisma } from "./prisma";
+import { logger } from "./logger";
+import * as Sentry from "@sentry/nextjs";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 
@@ -77,11 +79,18 @@ export function createSessionToken(nome: string): { token: string; expires: Date
   return createToken("admin", "legacy", nome);
 }
 
+/**
+ * @deprecated Legacy 4-part token format will be removed in v2.0.
+ * All new tokens use the 5-part format (role:id:nome:expires:sig).
+ * Legacy tokens issued before 2025-06-01 should be rotated.
+ */
 export function verifySessionToken(token: string): boolean {
-  // Suporta formato antigo (4 partes) e novo (5 partes)
   const parts = token.split(":");
   if (parts.length === 4) {
-    // Formato legado: role:nome:expires:sig
+    // Formato legado: role:nome:expires:sig — DEPRECATED
+    logger.warn("Legacy 4-part token used — schedule rotation", "auth", {
+      tokenPrefix: parts[0],
+    });
     try {
       const secret = getSecret();
       const [role, nome, expiresStr, signature] = parts;
@@ -137,7 +146,7 @@ export async function verifyUserCredentials(
   await prisma.user.update({
     where: { id: user.id },
     data: { ultimoLogin: new Date() },
-  }).catch(() => {});
+  }).catch((err) => logger.warn("Failed to update ultimoLogin", "auth", { error: String(err) }));
 
   return {
     valid: true,
@@ -155,7 +164,9 @@ export async function getUserSession(): Promise<{ id: string; nome: string; role
   if (!session) return null;
   const result = verifyToken(session.value);
   if (!result.valid) return null;
-  return { id: result.id!, nome: result.nome!, role: result.role! };
+  const user = { id: result.id!, nome: result.nome!, role: result.role! };
+  Sentry.setUser({ id: user.id, username: user.nome });
+  return user;
 }
 
 export async function hashPassword(password: string): Promise<string> {

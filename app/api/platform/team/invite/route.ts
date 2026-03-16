@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getUserSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { invalidate, CACHE_KEYS } from "@/lib/cache";
 import { z } from "zod";
 
 const acceptSchema = z.object({
@@ -69,6 +70,8 @@ export async function POST(request: Request) {
       data: { aceito: true },
     }),
   ]);
+
+  await invalidate(CACHE_KEYS.team(invite.empresaId));
 
   return NextResponse.json({
     message: `Entrou na equipe de ${invite.empresa.nome}`,

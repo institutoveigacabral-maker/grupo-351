@@ -45,6 +45,8 @@ model User {
   reviewsRecebidas Review[] @relation("ReviewsRecebidas")
 
   @@map("users")
+  @@index([email])
+  @@index([role])
 }
 
 model Company {
@@ -77,6 +79,9 @@ model Company {
   documents   Document[]
 
   @@map("companies")
+  @@index([slug])
+  @@index([setor])
+  @@index([verificada])
 }
 
 model CompanyMember {
@@ -115,6 +120,10 @@ model Opportunity {
   matches     Match[]
 
   @@map("opportunities")
+  @@index([companyId])
+  @@index([status])
+  @@index([tipo])
+  @@index([criadoEm])
 }
 
 model Match {
@@ -136,6 +145,9 @@ model Match {
 
   @@unique([opportunityId, fromUserId, toUserId])
   @@map("matches")
+  @@index([fromUserId])
+  @@index([toUserId])
+  @@index([status])
 }
 
 model PlatformProject {
@@ -196,6 +208,8 @@ model Message {
   match     Match    @relation(fields: [matchId], references: [id])
 
   @@map("messages")
+  @@index([matchId])
+  @@index([userId])
 }
 
 model Candidatura {
@@ -486,4 +500,17 @@ model Document {
 
   @@map("documents")
   @@index([empresaId])
+}
+
+// ─── Stripe Event Idempotency ───
+
+model StripeEvent {
+  id          String   @id @default(cuid())
+  eventId     String   @unique @map("event_id") // Stripe event ID (evt_xxx)
+  type        String   // checkout.session.completed, etc.
+  processed   Boolean  @default(true)
+  criadoEm    DateTime @default(now()) @map("criado_em")
+
+  @@map("stripe_events")
+  @@index([eventId])
 }

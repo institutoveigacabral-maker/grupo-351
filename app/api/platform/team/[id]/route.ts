@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getUserSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { invalidate, CACHE_KEYS } from "@/lib/cache";
 
 // DELETE — remover membro ou cancelar convite
 export async function DELETE(
@@ -31,6 +32,7 @@ export async function DELETE(
       return NextResponse.json({ error: "Não é possível remover o dono da empresa" }, { status: 403 });
     }
     await prisma.companyMember.delete({ where: { id: member.id } });
+    await invalidate(CACHE_KEYS.team(company.id));
     return NextResponse.json({ message: "Membro removido" });
   }
 
@@ -41,6 +43,7 @@ export async function DELETE(
 
   if (invite) {
     await prisma.teamInvite.delete({ where: { id: invite.id } });
+    await invalidate(CACHE_KEYS.team(company.id));
     return NextResponse.json({ message: "Convite cancelado" });
   }
 
@@ -91,6 +94,8 @@ export async function PATCH(
     where: { id: member.id },
     data: { role },
   });
+
+  await invalidate(CACHE_KEYS.team(company.id));
 
   return NextResponse.json({ message: "Role atualizado" });
 }

@@ -9,7 +9,7 @@ interface Props {
   params: Promise<{ slug: string }>;
 }
 
-export const dynamic = "force-dynamic";
+export const revalidate = 86400; // ISR: 24 horas
 
 export async function generateStaticParams() {
   const artigos = await getArtigos();

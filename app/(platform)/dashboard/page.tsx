@@ -7,6 +7,7 @@ import { OnboardingTour } from "@/components/OnboardingTour";
 import { KPICard } from "@/components/ui/kpi-card";
 import { SkeletonPage } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
+import { PageTransition, StaggerContainer, StaggerItem } from "@/components/ui/page-transition";
 
 interface DashboardData {
   company: { slug: string; nome: string; setor: string; estagio: string; verificada: boolean } | null;
@@ -37,7 +38,7 @@ export default function DashboardPage() {
   const firstName = user.nome.split(" ")[0];
 
   return (
-    <div className="space-y-8">
+    <PageTransition className="space-y-8">
       {/* Welcome */}
       <div className="flex items-center justify-between">
         <div>
@@ -57,35 +58,41 @@ export default function DashboardPage() {
       />
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <KPICard
-          icon={Building2}
-          label="Empresa"
-          value={data.company?.nome || "Não cadastrada"}
-          href="/dashboard/empresa"
-          iconBg="bg-amber-50"
-          iconColor="text-amber-600"
-          gradient="bg-gradient-to-br from-amber-500 to-orange-500"
-        />
-        <KPICard
-          icon={Lightbulb}
-          label="Oportunidades abertas"
-          value={data.opportunities}
-          href="/dashboard/oportunidades"
-          iconBg="bg-blue-50"
-          iconColor="text-blue-600"
-          gradient="bg-gradient-to-br from-blue-500 to-indigo-500"
-        />
-        <KPICard
-          icon={GitMerge}
-          label="Matches ativos"
-          value={data.matches}
-          href="/dashboard/matches"
-          iconBg="bg-emerald-50"
-          iconColor="text-emerald-600"
-          gradient="bg-gradient-to-br from-emerald-500 to-teal-500"
-        />
-      </div>
+      <StaggerContainer className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <StaggerItem>
+          <KPICard
+            icon={Building2}
+            label="Empresa"
+            value={data.company?.nome || "Não cadastrada"}
+            href="/dashboard/empresa"
+            iconBg="bg-amber-50"
+            iconColor="text-amber-600"
+            gradient="bg-gradient-to-br from-amber-500 to-orange-500"
+          />
+        </StaggerItem>
+        <StaggerItem>
+          <KPICard
+            icon={Lightbulb}
+            label="Oportunidades abertas"
+            value={data.opportunities}
+            href="/dashboard/oportunidades"
+            iconBg="bg-blue-50"
+            iconColor="text-blue-600"
+            gradient="bg-gradient-to-br from-blue-500 to-indigo-500"
+          />
+        </StaggerItem>
+        <StaggerItem>
+          <KPICard
+            icon={GitMerge}
+            label="Matches ativos"
+            value={data.matches}
+            href="/dashboard/matches"
+            iconBg="bg-emerald-50"
+            iconColor="text-emerald-600"
+            gradient="bg-gradient-to-br from-emerald-500 to-teal-500"
+          />
+        </StaggerItem>
+      </StaggerContainer>
 
       {/* Recent opportunities */}
       <div>
@@ -97,7 +104,7 @@ export default function DashboardPage() {
         </div>
         <RecentOpportunities />
       </div>
-    </div>
+    </PageTransition>
   );
 }
 

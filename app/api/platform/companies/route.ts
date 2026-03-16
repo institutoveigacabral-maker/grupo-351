@@ -2,8 +2,9 @@ import { NextResponse } from "next/server";
 import { getUserSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { companyCreateSchema } from "@/lib/validations";
+import { cached, invalidatePrefix, CACHE_KEYS } from "@/lib/cache";
 
-// GET — listar empresas (público ou filtrado)
+// GET — listar empresas (público ou filtrado) — cached 120s
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const setor = searchParams.get("setor");
@@ -12,38 +13,44 @@ export async function GET(request: Request) {
   const page = Math.max(1, Number(searchParams.get("page")) || 1);
   const limit = Math.min(50, Math.max(1, Number(searchParams.get("limit")) || 20));
 
-  const where: Record<string, unknown> = { ativa: true };
-  if (setor) where.setor = setor;
-  if (pais) where.pais = pais;
-  if (interesse) where.interesses = { has: interesse };
+  const cacheKey = CACHE_KEYS.publicCompanies(`${setor}:${pais}:${interesse}:${page}:${limit}`);
 
-  const [companies, total] = await Promise.all([
-    prisma.company.findMany({
-      where,
-      select: {
-        id: true,
-        slug: true,
-        nome: true,
-        tagline: true,
-        setor: true,
-        pais: true,
-        cidade: true,
-        estagio: true,
-        interesses: true,
-        logo: true,
-        verificada: true,
-      },
-      orderBy: { criadoEm: "desc" },
-      skip: (page - 1) * limit,
-      take: limit,
-    }),
-    prisma.company.count({ where }),
-  ]);
+  const result = await cached(cacheKey, async () => {
+    const where: Record<string, unknown> = { ativa: true };
+    if (setor) where.setor = setor;
+    if (pais) where.pais = pais;
+    if (interesse) where.interesses = { has: interesse };
 
-  return NextResponse.json({
-    companies,
-    pagination: { page, limit, total, pages: Math.ceil(total / limit) },
-  });
+    const [companies, total] = await Promise.all([
+      prisma.company.findMany({
+        where,
+        select: {
+          id: true,
+          slug: true,
+          nome: true,
+          tagline: true,
+          setor: true,
+          pais: true,
+          cidade: true,
+          estagio: true,
+          interesses: true,
+          logo: true,
+          verificada: true,
+        },
+        orderBy: { criadoEm: "desc" },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      prisma.company.count({ where }),
+    ]);
+
+    return {
+      companies,
+      pagination: { page, limit, total, pages: Math.ceil(total / limit) },
+    };
+  }, 120);
+
+  return NextResponse.json(result);
 }
 
 // POST — criar empresa (requer auth)
@@ -65,7 +72,7 @@ export async function POST(request: Request) {
   }
   const parsed = companyCreateSchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json({ error: "Dados inválidos", details: parsed.error.flatten() }, { status: 400 });
+    return NextResponse.json({ error: "Dados invalidos" }, { status: 400 });
   }
 
   // Criar com tratamento de constraints unicas (race condition)
@@ -79,6 +86,9 @@ export async function POST(request: Request) {
         },
       },
     });
+
+    await invalidatePrefix("public:companies:");
+
     return NextResponse.json(company, { status: 201 });
   } catch (err: unknown) {
     if (err && typeof err === "object" && "code" in err && err.code === "P2002") {

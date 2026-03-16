@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getUserSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createUserNotification } from "@/lib/user-notifications";
+import { cached, invalidate, CACHE_KEYS } from "@/lib/cache";
 import { z } from "zod";
 
 const reviewSchema = z.object({
@@ -20,31 +21,37 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "userId obrigatório" }, { status: 400 });
   }
 
-  const reviews = await prisma.review.findMany({
-    where: { avaliadoId: userId },
-    include: {
-      autor: { select: { id: true, nome: true } },
-      projeto: { select: { id: true, nome: true } },
-    },
-    orderBy: { criadoEm: "desc" },
-  });
+  const cacheKey = CACHE_KEYS.userReviews(userId);
 
-  const avg = reviews.length > 0
-    ? reviews.reduce((sum, r) => sum + r.nota, 0) / reviews.length
-    : 0;
+  const result = await cached(cacheKey, async () => {
+    const reviews = await prisma.review.findMany({
+      where: { avaliadoId: userId },
+      include: {
+        autor: { select: { id: true, nome: true } },
+        projeto: { select: { id: true, nome: true } },
+      },
+      orderBy: { criadoEm: "desc" },
+    });
 
-  return NextResponse.json({
-    reviews: reviews.map((r) => ({
-      id: r.id,
-      nota: r.nota,
-      comentario: r.comentario,
-      autor: r.autor,
-      projeto: r.projeto,
-      criadoEm: r.criadoEm.toISOString(),
-    })),
-    media: Math.round(avg * 10) / 10,
-    total: reviews.length,
-  });
+    const avg = reviews.length > 0
+      ? reviews.reduce((sum, r) => sum + r.nota, 0) / reviews.length
+      : 0;
+
+    return {
+      reviews: reviews.map((r) => ({
+        id: r.id,
+        nota: r.nota,
+        comentario: r.comentario,
+        autor: r.autor,
+        projeto: r.projeto,
+        criadoEm: r.criadoEm.toISOString(),
+      })),
+      media: Math.round(avg * 10) / 10,
+      total: reviews.length,
+    };
+  }, 120);
+
+  return NextResponse.json(result);
 }
 
 // POST — criar review (1 por projeto por autor)
@@ -59,7 +66,7 @@ export async function POST(request: Request) {
 
   const parsed = reviewSchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json({ error: "Dados inválidos", details: parsed.error.flatten() }, { status: 400 });
+    return NextResponse.json({ error: "Dados invalidos" }, { status: 400 });
   }
 
   const { projetoId, avaliadoId, nota, comentario } = parsed.data;
@@ -105,6 +112,8 @@ export async function POST(request: Request) {
         comentario: comentario || null,
       },
     });
+
+    await invalidate(CACHE_KEYS.userReviews(avaliadoId));
 
     // Notificar o avaliado
     createUserNotification({

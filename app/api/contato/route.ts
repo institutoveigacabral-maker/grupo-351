@@ -27,7 +27,7 @@ function orcamentoToNumber(orc?: string): number {
 export async function POST(request: Request) {
   try {
     const ip = getClientIP(request);
-    const rl = rateLimit(`contato:${ip}`, { limit: 5, windowMs: 60_000 });
+    const rl = await rateLimit(`contato:${ip}`, { limit: 5, windowMs: 60_000 });
     if (!rl.success) {
       return NextResponse.json({ error: "Muitas tentativas. Aguarde 1 minuto." }, { status: 429 });
     }
@@ -38,7 +38,7 @@ export async function POST(request: Request) {
     if (body.tipo === "aplicacao-jv") {
       const parsed = candidaturaCreateSchema.safeParse(body);
       if (!parsed.success) {
-        return NextResponse.json({ error: "Campos obrigatórios faltando", details: parsed.error.flatten() }, { status: 400 });
+        return NextResponse.json({ error: "Dados invalidos" }, { status: 400 });
       }
 
       const {
@@ -108,7 +108,7 @@ export async function POST(request: Request) {
     // Contato genérico (vem do /contato)
     const parsed = contatoCreateSchema.safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json({ error: "Campos obrigatórios faltando", details: parsed.error.flatten() }, { status: 400 });
+      return NextResponse.json({ error: "Dados invalidos" }, { status: 400 });
     }
 
     const { nome, email, empresa, tipo, orcamento, mensagem } = parsed.data;

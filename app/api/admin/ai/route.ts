@@ -5,7 +5,7 @@ import { createSSEStream } from "@/lib/ai/provider";
 
 export async function POST(request: Request) {
   const ip = getClientIP(request);
-  const rl = rateLimit(`ai:${ip}`, { limit: 10, windowMs: 60_000 });
+  const rl = await rateLimit(`ai:${ip}`, { limit: 10, windowMs: 60_000 });
   if (!rl.success) {
     return new Response(
       JSON.stringify({ error: "Limite de requisições atingido. Aguarde 1 minuto." }),
@@ -17,7 +17,7 @@ export async function POST(request: Request) {
   const parsed = aiMessagesSchema.safeParse(body);
   if (!parsed.success) {
     return new Response(
-      JSON.stringify({ error: "Dados inválidos", details: parsed.error.flatten() }),
+      JSON.stringify({ error: "Dados invalidos" }),
       { status: 400, headers: { "Content-Type": "application/json" } }
     );
   }

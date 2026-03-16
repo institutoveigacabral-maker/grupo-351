@@ -37,7 +37,7 @@ async function verifyToken(token: string): Promise<{ valid: boolean; role?: stri
   if (!secret) return { valid: false };
   const parts = token.split(":");
 
-  // Formato legado (4 partes): role:nome:expires:sig
+  // Formato legado (4 partes): role:nome:expires:sig — DEPRECATED, remove in v2.0
   if (parts.length === 4) {
     const [role, nome, expiresStr, signature] = parts;
     const payload = `${role}:${nome}:${expiresStr}`;
@@ -62,6 +62,7 @@ async function verifyToken(token: string): Promise<{ valid: boolean; role?: stri
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const requestId = crypto.randomUUID();
 
   // ─── Admin routes ───
   if (pathname.startsWith("/admin") || pathname.startsWith("/api/admin")) {
@@ -80,7 +81,9 @@ export async function middleware(request: NextRequest) {
       return redirectOrDeny(request, pathname, "/admin/login");
     }
 
-    return NextResponse.next();
+    const response = NextResponse.next();
+    response.headers.set("x-request-id", requestId);
+    return response;
   }
 
   // ─── Plataforma routes (dashboard, empresas, oportunidades) ───
@@ -104,13 +107,16 @@ export async function middleware(request: NextRequest) {
       return redirectOrDeny(request, pathname, "/login");
     }
 
-    // Injetar role no header para route handlers
+    // Injetar role e request-id no header para route handlers
     const response = NextResponse.next();
     response.headers.set("x-user-role", result.role || "");
+    response.headers.set("x-request-id", requestId);
     return response;
   }
 
-  return NextResponse.next();
+  const response = NextResponse.next();
+  response.headers.set("x-request-id", requestId);
+  return response;
 }
 
 function redirectOrDeny(request: NextRequest, pathname: string, loginPath: string) {

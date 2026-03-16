@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getUserSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { cached, invalidate, CACHE_KEYS } from "@/lib/cache";
 import { sendTeamInviteEmail } from "@/lib/email";
 import { z } from "zod";
 import crypto from "crypto";
@@ -15,44 +16,57 @@ export async function GET() {
   const session = await getUserSession();
   if (!session) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
 
-  const company = await prisma.company.findUnique({
-    where: { ownerId: session.id },
-    include: {
-      members: {
-        include: { user: { select: { id: true, nome: true, email: true, avatar: true, ultimoLogin: true } } },
-        orderBy: { criadoEm: "asc" },
-      },
-      teamInvites: {
-        where: { aceito: false, expiraEm: { gt: new Date() } },
-        orderBy: { criadoEm: "desc" },
-      },
-    },
-  });
-
+  const company = await prisma.company.findUnique({ where: { ownerId: session.id }, select: { id: true } });
   if (!company) {
     return NextResponse.json({ error: "Empresa não encontrada" }, { status: 404 });
   }
 
-  return NextResponse.json({
-    members: company.members.map((m) => ({
-      id: m.id,
-      userId: m.user.id,
-      nome: m.user.nome,
-      email: m.user.email,
-      avatar: m.user.avatar,
-      role: m.role,
-      ultimoLogin: m.user.ultimoLogin,
-      criadoEm: m.criadoEm,
-    })),
-    invites: company.teamInvites.map((i) => ({
-      id: i.id,
-      email: i.email,
-      role: i.role,
-      criadoEm: i.criadoEm,
-      expiraEm: i.expiraEm,
-    })),
-    ownerId: company.ownerId,
-  });
+  const data = await cached(
+    CACHE_KEYS.team(company.id),
+    async () => {
+      const c = await prisma.company.findUnique({
+        where: { id: company.id },
+        include: {
+          members: {
+            include: { user: { select: { id: true, nome: true, email: true, avatar: true, ultimoLogin: true } } },
+            orderBy: { criadoEm: "asc" },
+          },
+          teamInvites: {
+            where: { aceito: false, expiraEm: { gt: new Date() } },
+            orderBy: { criadoEm: "desc" },
+          },
+        },
+      });
+      if (!c) return null;
+      return {
+        members: c.members.map((m) => ({
+          id: m.id,
+          userId: m.user.id,
+          nome: m.user.nome,
+          email: m.user.email,
+          avatar: m.user.avatar,
+          role: m.role,
+          ultimoLogin: m.user.ultimoLogin,
+          criadoEm: m.criadoEm,
+        })),
+        invites: c.teamInvites.map((i) => ({
+          id: i.id,
+          email: i.email,
+          role: i.role,
+          criadoEm: i.criadoEm,
+          expiraEm: i.expiraEm,
+        })),
+        ownerId: c.ownerId,
+      };
+    },
+    120
+  );
+
+  if (!data) {
+    return NextResponse.json({ error: "Empresa não encontrada" }, { status: 404 });
+  }
+
+  return NextResponse.json(data);
 }
 
 // POST — enviar convite para novo membro
@@ -88,7 +102,7 @@ export async function POST(request: Request) {
 
   const parsed = inviteSchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json({ error: "Dados inválidos", details: parsed.error.flatten() }, { status: 400 });
+    return NextResponse.json({ error: "Dados invalidos" }, { status: 400 });
   }
 
   const { email, role } = parsed.data;
@@ -139,6 +153,8 @@ export async function POST(request: Request) {
     role,
     token,
   });
+
+  await invalidate(CACHE_KEYS.team(company.id));
 
   return NextResponse.json({
     id: invite.id,

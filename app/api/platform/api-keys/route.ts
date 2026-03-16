@@ -3,6 +3,8 @@ import { getUserSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { generateApiKey } from "@/lib/api-auth";
 import { getCompanyPlan } from "@/lib/stripe";
+import { logPlatformAudit } from "@/lib/audit";
+import { cached, invalidate, CACHE_KEYS } from "@/lib/cache";
 
 // GET — minhas API keys
 export async function GET() {
@@ -11,25 +13,28 @@ export async function GET() {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
 
-  const keys = await prisma.apiKey.findMany({
-    where: { userId: session.id },
-    select: {
-      id: true,
-      key: true,
-      nome: true,
-      scopes: true,
-      ativa: true,
-      ultimoUso: true,
-      criadoEm: true,
-    },
-    orderBy: { criadoEm: "desc" },
-  });
+  const cacheKey = CACHE_KEYS.apiKeys(session.id);
 
-  // Mascarar keys (mostrar apenas primeiros 12 chars)
-  const masked = keys.map((k) => ({
-    ...k,
-    key: k.key.slice(0, 12) + "..." + k.key.slice(-4),
-  }));
+  const masked = await cached(cacheKey, async () => {
+    const keys = await prisma.apiKey.findMany({
+      where: { userId: session.id },
+      select: {
+        id: true,
+        key: true,
+        nome: true,
+        scopes: true,
+        ativa: true,
+        ultimoUso: true,
+        criadoEm: true,
+      },
+      orderBy: { criadoEm: "desc" },
+    });
+
+    return keys.map((k) => ({
+      ...k,
+      key: k.key.slice(0, 12) + "..." + k.key.slice(-4),
+    }));
+  }, 300);
 
   return NextResponse.json(masked);
 }
@@ -77,6 +82,17 @@ export async function POST(request: Request) {
     },
   });
 
+  await logPlatformAudit({
+    acao: "CREATE_API_KEY",
+    recurso: "api_key",
+    resourceId: apiKey.id,
+    userId: session.id,
+    userNome: session.nome || "unknown",
+    detalhes: { nome, scopes: filteredScopes },
+  });
+
+  await invalidate(CACHE_KEYS.apiKeys(session.id));
+
   // Retornar key completa apenas na criação
   return NextResponse.json({
     id: apiKey.id,
@@ -109,6 +125,17 @@ export async function DELETE(request: Request) {
     where: { id: keyId },
     data: { ativa: false },
   });
+
+  await logPlatformAudit({
+    acao: "REVOKE_API_KEY",
+    recurso: "api_key",
+    resourceId: keyId,
+    userId: session.id,
+    userNome: session.nome || "unknown",
+    detalhes: { keyNome: key.nome },
+  });
+
+  await invalidate(CACHE_KEYS.apiKeys(session.id));
 
   return NextResponse.json({ success: true });
 }

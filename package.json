@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && next build",
+    "analyze": "ANALYZE=true prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
     "postinstall": "prisma generate",
@@ -13,7 +14,11 @@
     "db:migrate": "npx tsx scripts/migrate-json-to-db.ts",
     "db:studio": "prisma studio",
     "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx}\"",
-    "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx}\""
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx}\"",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "audit:deps": "pnpm audit --audit-level=high"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.78.0",
@@ -24,8 +29,11 @@
     "@prisma/client": "^7.5.0",
     "@prisma/pg-worker": "^6.9.0",
     "@sentry/nextjs": "^10.43.0",
+    "@tanstack/react-query": "^5.90.21",
     "@upstash/redis": "^1.37.0",
+    "@vercel/speed-insights": "^2.0.0",
     "bcryptjs": "^3.0.3",
+    "cmdk": "^1.1.1",
     "dotenv": "^17.3.1",
     "framer-motion": "^12.35.2",
     "lucide-react": "^0.577.0",
@@ -36,6 +44,7 @@
     "react-hook-form": "^7.71.2",
     "recharts": "^3.8.0",
     "resend": "^6.9.3",
+    "sonner": "^2.0.7",
     "stripe": "^20.4.1",
     "ws": "^8.19.0",
     "zod": "^4.3.6",
@@ -43,6 +52,7 @@
     "@vercel/speed-insights": "^1.0.0"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^16.1.6",
     "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
@@ -54,6 +64,7 @@
     "@types/ws": "^8.18.1",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
     "jsdom": "^29.0.0",
     "prisma": "^7.5.0",
     "tailwindcss": "^4",

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getUserSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { cached, invalidate, CACHE_KEYS } from "@/lib/cache";
 
 // GET — meus projetos
 export async function GET() {
@@ -9,35 +10,39 @@ export async function GET() {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
 
-  const company = await prisma.company.findUnique({ where: { ownerId: session.id } });
+  const company = await prisma.company.findUnique({ where: { ownerId: session.id }, select: { id: true } });
   if (!company) {
     return NextResponse.json([]);
   }
 
-  const projects = await prisma.platformProject.findMany({
-    where: {
-      members: { some: { companyId: company.id } },
-    },
-    include: {
-      match: {
-        include: {
-          opportunity: { select: { titulo: true, tipo: true } },
-          fromUser: { select: { nome: true } },
-          toUser: { select: { nome: true } },
+  const projects = await cached(
+    CACHE_KEYS.projects(company.id),
+    () => prisma.platformProject.findMany({
+      where: {
+        members: { some: { companyId: company.id } },
+      },
+      include: {
+        match: {
+          include: {
+            opportunity: { select: { titulo: true, tipo: true } },
+            fromUser: { select: { nome: true } },
+            toUser: { select: { nome: true } },
+          },
+        },
+        members: {
+          include: {
+            company: { select: { nome: true, slug: true } },
+          },
+        },
+        tasks: {
+          orderBy: { criadoEm: "desc" },
+          take: 10,
         },
       },
-      members: {
-        include: {
-          company: { select: { nome: true, slug: true } },
-        },
-      },
-      tasks: {
-        orderBy: { criadoEm: "desc" },
-        take: 10,
-      },
-    },
-    orderBy: { criadoEm: "desc" },
-  });
+      orderBy: { criadoEm: "desc" },
+    }),
+    300
+  );
 
   return NextResponse.json(projects);
 }
@@ -104,6 +109,13 @@ export async function POST(request: Request) {
     where: { id: matchId },
     data: { status: "fechado" },
   });
+
+  // Invalidate caches for both companies + matches
+  const keysToInvalidate: string[] = [];
+  if (fromCompany) keysToInvalidate.push(CACHE_KEYS.projects(fromCompany.id));
+  if (toCompany) keysToInvalidate.push(CACHE_KEYS.projects(toCompany.id));
+  keysToInvalidate.push(CACHE_KEYS.matches(match.fromUserId), CACHE_KEYS.matches(match.toUserId));
+  await invalidate(...keysToInvalidate);
 
   return NextResponse.json(project, { status: 201 });
 }

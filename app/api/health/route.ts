@@ -1,13 +1,17 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { cached } from "@/lib/cache";
+
+type CheckStatus = "healthy" | "unhealthy";
 
 interface HealthCheck {
-  status: "healthy" | "unhealthy";
+  status: CheckStatus;
   timestamp: string;
   uptime: number;
   version: string;
   checks: {
-    database: { status: "healthy" | "unhealthy"; latency: number; error?: string };
+    database: { status: CheckStatus; latency: number; error?: string };
+    redis: { status: CheckStatus; latency: number; error?: string };
     memory: { rss: number; heapUsed: number; heapTotal: number };
   };
 }
@@ -15,7 +19,7 @@ interface HealthCheck {
 export async function GET() {
   const memoryUsage = process.memoryUsage();
 
-  let dbStatus: "healthy" | "unhealthy" = "healthy";
+  let dbStatus: CheckStatus = "healthy";
   let dbLatency = 0;
   let dbError: string | undefined;
 
@@ -28,7 +32,22 @@ export async function GET() {
     dbError = error instanceof Error ? error.message : "Erro desconhecido";
   }
 
-  const overallStatus = dbStatus === "healthy" ? "healthy" : "unhealthy";
+  // Redis health check via cached() — if it works, Redis is up
+  let redisStatus: CheckStatus = "healthy";
+  let redisLatency = 0;
+  let redisError: string | undefined;
+
+  try {
+    const start = Date.now();
+    await cached("health:ping", async () => "pong", 10);
+    redisLatency = Date.now() - start;
+  } catch (error) {
+    redisStatus = "unhealthy";
+    redisError = error instanceof Error ? error.message : "Erro desconhecido";
+  }
+
+  const overallStatus: CheckStatus =
+    dbStatus === "healthy" && redisStatus === "healthy" ? "healthy" : "unhealthy";
 
   const health: HealthCheck = {
     status: overallStatus,
@@ -40,6 +59,11 @@ export async function GET() {
         status: dbStatus,
         latency: dbLatency,
         ...(dbError ? { error: dbError } : {}),
+      },
+      redis: {
+        status: redisStatus,
+        latency: redisLatency,
+        ...(redisError ? { error: redisError } : {}),
       },
       memory: {
         rss: Math.round(memoryUsage.rss / 1024 / 1024),

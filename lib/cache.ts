@@ -1,4 +1,26 @@
 import { Redis } from "@upstash/redis";
+import { logger } from "./logger";
+
+/** Typed cache key builders to avoid collisions and simplify invalidation. */
+export const CACHE_KEYS = {
+  userProfile: (userId: string) => `user:${userId}:profile`,
+  notifications: (userId: string) => `user:${userId}:notifications`,
+  matches: (userId: string) => `user:${userId}:matches`,
+  team: (companyId: string) => `company:${companyId}:team`,
+  projects: (companyId: string) => `company:${companyId}:projects`,
+  billing: (companyId: string) => `company:${companyId}:billing`,
+  opportunities: (companyId: string) => `company:${companyId}:opportunities`,
+  // Public listing caches
+  publicOpportunities: (params: string) => `public:opportunities:${params}`,
+  publicCompanies: (params: string) => `public:companies:${params}`,
+  companyProfile: (slug: string) => `public:company:${slug}`,
+  // User-scoped caches
+  userReviews: (userId: string) => `user:${userId}:reviews`,
+  apiKeys: (userId: string) => `user:${userId}:api-keys`,
+  billingInvoices: (companyId: string) => `company:${companyId}:invoices`,
+  // Admin
+  adminAnalytics: () => `admin:analytics`,
+} as const;
 
 let redis: Redis | null = null;
 
@@ -26,16 +48,16 @@ export async function cached<T>(
   try {
     const hit = await r.get<T>(key);
     if (hit !== null && hit !== undefined) return hit;
-  } catch {
-    // Redis down — fallthrough
+  } catch (err) {
+    logger.warn(`Redis GET failed for ${key}`, "cache", { error: String(err) });
   }
 
   const data = await fetcher();
 
   try {
     await r.set(key, JSON.stringify(data), { ex: ttl });
-  } catch {
-    // Redis down — ignore
+  } catch (err) {
+    logger.warn(`Redis SET failed for ${key}`, "cache", { error: String(err) });
   }
 
   return data;
@@ -49,8 +71,8 @@ export async function invalidate(...keys: string[]): Promise<void> {
   if (!r || keys.length === 0) return;
   try {
     await r.del(...keys);
-  } catch {
-    // ignore
+  } catch (err) {
+    logger.warn(`Redis DEL failed for ${keys.join(", ")}`, "cache", { error: String(err) });
   }
 }
 
@@ -71,7 +93,7 @@ export async function invalidatePrefix(prefix: string): Promise<void> {
       if (nextCursor === 0) done = true;
       else cur = nextCursor;
     }
-  } catch {
-    // ignore
+  } catch (err) {
+    logger.warn(`Redis SCAN failed for prefix ${prefix}`, "cache", { error: String(err) });
   }
 }

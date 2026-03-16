@@ -3,7 +3,7 @@ import { Lightbulb, Building2, MapPin, ArrowRight, Sparkles, Wallet } from "luci
 import Link from "next/link";
 import type { Metadata } from "next";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300; // ISR: 5 min
 
 export const metadata: Metadata = {
   title: "Oportunidades — GRUPO +351",

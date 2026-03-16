@@ -14,7 +14,9 @@ export default function SiteLayout({
     <>
       <Nav />
       <ScrollProgress />
-      {children}
+      <main id="main-content">
+        {children}
+      </main>
       <Footer />
       <WhatsAppButton />
       <BackToTop />

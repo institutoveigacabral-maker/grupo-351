@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { MessageSquare, ArrowRight, Zap } from "lucide-react";
+import Image from "next/image";
 
 interface AdminMatch {
   id: string;
@@ -130,7 +131,7 @@ export default function DealsPage() {
                           {[m.fromUser, m.toUser].map((u) => (
                             <div key={u.id} className="w-5 h-5 rounded-full bg-gradient-to-br from-accent/60 to-accent-light/60 border border-white flex items-center justify-center">
                               {u.avatar ? (
-                                <img src={u.avatar} alt="" className="w-full h-full rounded-full object-cover" />
+                                <Image src={u.avatar} alt={`Avatar de ${u.nome}`} width={32} height={32} className="w-full h-full rounded-full object-cover" />
                               ) : (
                                 <span className="text-white text-[8px] font-bold">{u.nome.charAt(0)}</span>
                               )}
