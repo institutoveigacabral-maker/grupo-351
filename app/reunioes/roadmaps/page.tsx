@@ -143,7 +143,7 @@ export default function RoadmapsPage() {
   const [activePhase, setActivePhase] = useState<Record<string, number>>({});
 
   useEffect(() => {
-    if (!token) { setLoading(false); setError(true); return; }
+    if (!token) { queueMicrotask(() => { setLoading(false); setError(true); }); return; }
     fetch(`/api/reunioes/roadmaps?token=${encodeURIComponent(token)}`)
       .then((r) => { if (!r.ok) throw new Error(); return r.json(); })
       .then((d) => { setData(d); setLoading(false); })

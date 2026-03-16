@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 export default function NotFound() {
@@ -12,13 +13,13 @@ export default function NotFound() {
           A página que procura não existe ou foi movida. Volte à página inicial
           para continuar a navegar.
         </p>
-        <a
+        <Link
           href="/"
           className="group inline-flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-light transition-all"
         >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
           Voltar ao início
-        </a>
+        </Link>
       </div>
     </main>
   );

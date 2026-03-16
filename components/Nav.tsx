@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, ArrowRight, Shield } from "lucide-react";
 import { Logo } from "./Logo";
@@ -41,9 +42,9 @@ export function Nav() {
       style={{ transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)" }}
     >
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-        <a href="/" className="relative z-10">
+        <Link href="/" className="relative z-10">
           <Logo className="text-primary transition-colors duration-300" size={28} />
-        </a>
+        </Link>
 
         {/* Desktop */}
         <div className="hidden md:flex items-center gap-1">

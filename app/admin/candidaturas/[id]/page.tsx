@@ -31,6 +31,20 @@ const statusOptions: { value: CandidaturaStatus; label: string; color: string }[
 
 const socios = ["Henrique Lemos", "Fernando Vieira", "Herson Rosa"];
 
+function Field({ icon: Icon, label, value }: { icon: typeof User; label: string; value: string | undefined }) {
+  return (
+    <div className="flex items-start gap-3">
+      <div className="w-8 h-8 rounded-lg bg-surface flex items-center justify-center shrink-0">
+        <Icon className="w-4 h-4 text-muted" />
+      </div>
+      <div>
+        <p className="text-[10px] text-muted uppercase tracking-wider">{label}</p>
+        <p className="text-sm text-foreground">{value || "\u2014"}</p>
+      </div>
+    </div>
+  );
+}
+
 export default function CandidaturaDetalhe() {
   const params = useParams();
   const router = useRouter();
@@ -77,18 +91,6 @@ export default function CandidaturaDetalhe() {
       </div>
     );
   }
-
-  const Field = ({ icon: Icon, label, value }: { icon: typeof User; label: string; value: string | undefined }) => (
-    <div className="flex items-start gap-3">
-      <div className="w-8 h-8 rounded-lg bg-surface flex items-center justify-center shrink-0">
-        <Icon className="w-4 h-4 text-muted" />
-      </div>
-      <div>
-        <p className="text-[10px] text-muted uppercase tracking-wider">{label}</p>
-        <p className="text-sm text-foreground">{value || "—"}</p>
-      </div>
-    </div>
-  );
 
   return (
     <div className="space-y-6 max-w-5xl">

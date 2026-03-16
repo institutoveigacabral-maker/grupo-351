@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import {
   Users,
@@ -246,9 +247,9 @@ export default function AdminDashboard() {
         <motion.div variants={fadeUp} className="bg-white rounded-2xl border border-black/[0.04] p-6">
           <div className="flex items-center justify-between mb-5">
             <h2 className="font-semibold text-foreground text-[15px]">Últimas candidaturas</h2>
-            <a href="/admin/candidaturas" className="text-accent text-xs font-medium hover:underline flex items-center gap-1 group">
+            <Link href="/admin/candidaturas" className="text-accent text-xs font-medium hover:underline flex items-center gap-1 group">
               Ver todas <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
-            </a>
+            </Link>
           </div>
           {candidaturas.length === 0 ? (
             <div className="text-center py-10">

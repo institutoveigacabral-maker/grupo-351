@@ -116,6 +116,7 @@ function GlossarioTab() {
     setLoading(false);
   }, []);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- setState calls are after await (async)
   useEffect(() => { fetchTermos(); }, [fetchTermos]);
 
   function updateField(slug: string, field: keyof Termo, value: string) {
@@ -385,6 +386,7 @@ function ArtigosTab() {
     setLoading(false);
   }, []);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- setState calls are after await (async)
   useEffect(() => { fetchArtigos(); }, [fetchArtigos]);
 
   function updateField(slug: string, field: keyof Artigo, value: unknown) {

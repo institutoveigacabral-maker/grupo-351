@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Link from "next/link";
 import { ArrowLeft, ArrowRight, BookOpen } from "lucide-react";
 import { AnimatedSection } from "@/components/AnimatedSection";
 import type { Artigo } from "@/lib/conhecimento-types";
@@ -26,13 +27,13 @@ export function ArtigoPage({ artigo, allArtigos }: { artigo: Artigo; allArtigos:
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7 }}
           >
-            <a
+            <Link
               href="/conhecimento"
               className="inline-flex items-center gap-2 text-muted hover:text-primary transition-colors text-sm mb-8"
             >
               <ArrowLeft className="w-4 h-4" />
               Base de Conhecimento
-            </a>
+            </Link>
 
             <span className="text-[10px] font-medium text-accent bg-accent/5 px-2.5 py-1 rounded-full uppercase tracking-wider">
               {categoriaLabels[artigo.categoria]}

@@ -150,7 +150,7 @@ export default function InteligenciaPage() {
   const [search, setSearch] = useState("");
   const [selectedCat, setSelectedCat] = useState<string | null>(null);
   useEffect(() => {
-    if (!token) { setLoading(false); setError(true); return; }
+    if (!token) { queueMicrotask(() => { setLoading(false); setError(true); }); return; }
     fetch(`/api/reunioes/analise?token=${encodeURIComponent(token)}`)
       .then((r) => { if (!r.ok) throw new Error(); return r.json(); })
       .then((d) => { setData(d); setLoading(false); })

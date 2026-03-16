@@ -88,7 +88,7 @@ describe("portfolioListSchema", () => {
     const projetos = [
       { slug: "test", name: "Test", tagline: "t", description: "desc", detalhes: [], tag: "x", status: "active", mercado: "PT", controle: "100%", icon: "t" },
     ];
-    const schema = portfolioListSchema(projetos as any);
+    const schema = portfolioListSchema(projetos as unknown as Parameters<typeof portfolioListSchema>[0]);
     expect(schema["@type"]).toBe("CollectionPage");
     expect(schema.mainEntity.numberOfItems).toBe(1);
   });
@@ -108,7 +108,7 @@ describe("projetoSchema", () => {
       controle: "100%",
       icon: "🚀",
     };
-    const schemas = projetoSchema(projeto as any);
+    const schemas = projetoSchema(projeto as unknown as Parameters<typeof projetoSchema>[0]);
     expect(schemas).toHaveLength(2); // Service + Breadcrumb
     expect(schemas[0]["@type"]).toBe("Service");
     expect(schemas[0].name).toBe("Delivery Express");

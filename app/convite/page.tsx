@@ -14,8 +14,10 @@ function ConviteContent() {
 
   useEffect(() => {
     if (!token) {
-      setStatus("error");
-      setMessage("Token de convite nao encontrado.");
+      queueMicrotask(() => {
+        setStatus("error");
+        setMessage("Token de convite nao encontrado.");
+      });
       return;
     }
 

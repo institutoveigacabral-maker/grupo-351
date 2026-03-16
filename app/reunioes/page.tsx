@@ -45,7 +45,7 @@ export default function HubPage() {
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    if (!token) { setLoading(false); setError(true); return; }
+    if (!token) { queueMicrotask(() => { setLoading(false); setError(true); }); return; }
     fetch(`/api/reunioes/hub?token=${encodeURIComponent(token)}`)
       .then((r) => { if (!r.ok) throw new Error(); return r.json(); })
       .then((d) => { setData(d); setLoading(false); })

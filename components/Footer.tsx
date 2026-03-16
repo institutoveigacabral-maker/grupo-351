@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Logo } from "./Logo";
 
 const navLinks = [
@@ -20,9 +21,9 @@ export function Footer() {
         <div className="grid md:grid-cols-3 gap-12">
           {/* Brand */}
           <div>
-            <a href="/">
+            <Link href="/">
               <Logo className="text-white" size={28} />
-            </a>
+            </Link>
             <p className="text-white/40 text-[13px] mt-3 leading-relaxed max-w-xs">
               Hub de Negócios e Joint Ventures sediado em Cascais, Portugal. Arquitetura FIGITAL.
             </p>

@@ -82,8 +82,7 @@ export default function ReunioesPublicPage() {
   const [view, setView] = useState<"timeline" | "stats">("timeline");
   useEffect(() => {
     if (!token) {
-      setLoading(false);
-      setError(true);
+      queueMicrotask(() => { setLoading(false); setError(true); });
       return;
     }
     fetch(`/api/reunioes?token=${encodeURIComponent(token)}`)

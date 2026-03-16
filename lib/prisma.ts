@@ -23,7 +23,7 @@ function createClient() {
   } as never);
 
   if (isDev) {
-    (client.$on as Function)("query", (e: { query: string; duration: number; params: string }) => {
+    (client.$on as (...args: unknown[]) => void)("query", (e: { query: string; duration: number; params: string }) => {
       if (e.duration > 500) {
         logger.warn(`Slow query (${e.duration}ms): ${e.query}`, "prisma", {
           duration: e.duration,

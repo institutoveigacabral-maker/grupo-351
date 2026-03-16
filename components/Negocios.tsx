@@ -8,6 +8,7 @@ import {
   ArrowUpRight,
 } from "lucide-react";
 import { motion, useInView } from "framer-motion";
+import Link from "next/link";
 import { useRef } from "react";
 
 const ease = [0.16, 1, 0.3, 1] as const;
@@ -79,13 +80,13 @@ export function Negocios() {
               Marcas e operacoes
             </h2>
           </div>
-          <a
+          <Link
             href="/portfolio"
             className="inline-flex items-center gap-1.5 text-accent text-[14px] font-medium hover:underline underline-offset-4 group shrink-0"
           >
             Ver todas as 7 marcas
             <span className="group-hover:translate-x-0.5 transition-transform duration-300">&rarr;</span>
-          </a>
+          </Link>
         </motion.div>
 
         <div className="grid md:grid-cols-2 gap-5 mb-10">
@@ -134,13 +135,13 @@ export function Negocios() {
           className="flex flex-wrap gap-2.5"
         >
           {["Córtex FC", "Long View", "Barbearia do Rão"].map((name) => (
-            <a
+            <Link
               key={name}
               href="/portfolio"
               className="text-[12px] font-medium text-muted bg-white border border-black/[0.04] px-4 py-2 rounded-full hover:border-black/[0.08] hover:text-primary hover:shadow-sm transition-all duration-300"
             >
               + {name}
-            </a>
+            </Link>
           ))}
           <span className="text-[12px] text-muted/60 self-center ml-1 font-medium">
             e mais no portfolio completo

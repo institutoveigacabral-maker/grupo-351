@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
+import Link from "next/link";
 import { useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -212,14 +213,14 @@ export default function AdminLayout({
 
           {/* Bottom */}
           <div className="px-3 py-4 space-y-0.5">
-            <a
+            <Link
               href="/"
               className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-[13px] text-white/40 hover:text-white/70 hover:bg-white/5 transition-all"
             >
               <ExternalLink className="w-[18px] h-[18px]" />
               Ver site
               <ChevronRight className="w-3.5 h-3.5 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
-            </a>
+            </Link>
             <button
               onClick={handleLogout}
               className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-[13px] text-white/40 hover:text-red-400 hover:bg-red-500/5 transition-all w-full"

@@ -132,7 +132,7 @@ export default function PortfolioAdminPage() {
   }, []);
 
   useEffect(() => {
-    fetchProjetos();
+    fetchProjetos(); // eslint-disable-line react-hooks/set-state-in-effect -- setState calls are after await (async)
   }, [fetchProjetos]);
 
   function updateField(slug: string, field: keyof Projeto, value: unknown) {

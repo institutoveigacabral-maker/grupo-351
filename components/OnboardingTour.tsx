@@ -50,7 +50,9 @@ export function OnboardingTour({ hasCompany, hasOpportunity }: OnboardingTourPro
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      setDismissed(localStorage.getItem("onboarding_dismissed") === "true");
+      queueMicrotask(() => {
+        setDismissed(localStorage.getItem("onboarding_dismissed") === "true");
+      });
     }
   }, []);
 

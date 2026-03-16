@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Link from "next/link";
 import {
   ArrowLeft,
   ArrowRight,
@@ -41,13 +42,13 @@ export function ProjetoPage({ projeto }: { projeto: Projeto }) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7 }}
           >
-            <a
+            <Link
               href="/portfolio"
               className="inline-flex items-center gap-2 text-muted hover:text-primary transition-colors text-sm mb-8"
             >
               <ArrowLeft className="w-4 h-4" />
               Voltar ao portfólio
-            </a>
+            </Link>
 
             <div className="flex items-start gap-6 mb-6">
               <div className="w-16 h-16 rounded-2xl bg-primary/5 flex items-center justify-center shrink-0">

@@ -30,8 +30,10 @@ export function TypeWriter({
     }
 
     if (isDeleting && text === "") {
-      setIsDeleting(false);
-      setIndex((i) => (i + 1) % words.length);
+      queueMicrotask(() => {
+        setIsDeleting(false);
+        setIndex((i) => (i + 1) % words.length);
+      });
       return;
     }
 

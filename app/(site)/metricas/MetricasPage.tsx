@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import {
   BarChart3,
@@ -205,13 +206,13 @@ export function MetricasPage() {
                 Candidatar-se
                 <ArrowRight className="w-4 h-4" />
               </a>
-              <a
+              <Link
                 href="/portfolio"
                 className="inline-flex items-center gap-2 border-2 border-primary text-primary px-6 py-3 rounded-xl font-medium hover:bg-primary hover:text-white transition-all"
               >
                 Ver portfólio
                 <ArrowRight className="w-4 h-4" />
-              </a>
+              </Link>
             </div>
           </AnimatedSection>
         </div>
