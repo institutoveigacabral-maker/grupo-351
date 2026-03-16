@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { FolderKanban, CheckCircle, Clock, AlertCircle } from "lucide-react";
+import { PageHeader } from "@/components/ui/page-header";
+import { EmptyState } from "@/components/ui/empty-state";
+import { SkeletonPage } from "@/components/ui/skeleton";
 
 interface Project {
   id: string;
@@ -27,10 +30,10 @@ interface Task {
 }
 
 const statusConfig: Record<string, { label: string; color: string; icon: typeof CheckCircle }> = {
-  ativo: { label: "Ativo", color: "bg-emerald-50 text-emerald-700", icon: Clock },
-  pausado: { label: "Pausado", color: "bg-amber-50 text-amber-700", icon: AlertCircle },
-  concluido: { label: "Concluído", color: "bg-blue-50 text-blue-700", icon: CheckCircle },
-  cancelado: { label: "Cancelado", color: "bg-red-50 text-red-700", icon: AlertCircle },
+  ativo: { label: "Ativo", color: "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/10", icon: Clock },
+  pausado: { label: "Pausado", color: "bg-amber-50 text-amber-700 ring-1 ring-amber-600/10", icon: AlertCircle },
+  concluido: { label: "Concluido", color: "bg-blue-50 text-blue-700 ring-1 ring-blue-600/10", icon: CheckCircle },
+  cancelado: { label: "Cancelado", color: "bg-red-50 text-red-700 ring-1 ring-red-600/10", icon: AlertCircle },
 };
 
 const taskStatusColors: Record<string, string> = {
@@ -50,34 +53,18 @@ export default function ProjetosPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-2 border-amber-500/20 border-t-amber-500 rounded-full animate-spin" />
-      </div>
-    );
-  }
+  if (loading) return <SkeletonPage />;
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center">
-          <FolderKanban className="w-5 h-5 text-purple-600" />
-        </div>
-        <div>
-          <h1 className="text-xl font-bold text-gray-900">Projetos</h1>
-          <p className="text-sm text-gray-400">{projects.length} projeto(s)</p>
-        </div>
-      </div>
+      <PageHeader icon={FolderKanban} iconBg="bg-purple-50" iconColor="text-purple-600" title="Projetos" description={`${projects.length} projeto(s)`} />
 
       {projects.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-black/[0.04] p-12 text-center">
-          <FolderKanban className="w-8 h-8 text-gray-200 mx-auto mb-3" />
-          <p className="text-gray-400 text-sm">Nenhum projeto ainda.</p>
-          <p className="text-gray-300 text-xs mt-1">
-            Projetos são criados quando um match é aceito e ambas as partes iniciam uma parceria.
-          </p>
-        </div>
+        <EmptyState
+          icon={FolderKanban}
+          title="Nenhum projeto ainda"
+          description="Projetos sao criados quando um match e aceito e ambas as partes iniciam uma parceria."
+        />
       ) : (
         <div className="space-y-4">
           {projects.map((project) => {
@@ -85,21 +72,22 @@ export default function ProjetosPage() {
             const Icon = st.icon;
             const totalTasks = project.tasks.length;
             const doneTasks = project.tasks.filter((t) => t.status === "concluida").length;
+            const progress = totalTasks > 0 ? (doneTasks / totalTasks) * 100 : 0;
 
             return (
-              <div key={project.id} className="bg-white rounded-2xl border border-black/[0.04] p-6">
+              <div key={project.id} className="group bg-white rounded-2xl border border-black/[0.04] p-6 hover:shadow-xl hover:shadow-black/[0.03] hover:border-black/[0.06] transition-all duration-300">
                 {/* Header */}
                 <div className="flex items-start justify-between mb-4">
-                  <div>
-                    <h3 className="font-semibold text-gray-900 text-lg">{project.nome}</h3>
+                  <div className="min-w-0">
+                    <h3 className="font-semibold text-gray-900 text-lg group-hover:text-purple-700 transition-colors">{project.nome}</h3>
                     {project.descricao && (
-                      <p className="text-sm text-gray-500 mt-1">{project.descricao}</p>
+                      <p className="text-sm text-gray-500 mt-1 line-clamp-2">{project.descricao}</p>
                     )}
                     <p className="text-xs text-gray-400 mt-2">
                       Origem: {project.match.opportunity.titulo}
                     </p>
                   </div>
-                  <span className={`inline-flex items-center gap-1 text-[11px] font-medium px-2.5 py-1 rounded-full ${st.color}`}>
+                  <span className={`inline-flex items-center gap-1 text-[11px] font-medium px-2.5 py-1 rounded-full shrink-0 ml-3 ${st.color}`}>
                     <Icon className="w-3 h-3" /> {st.label}
                   </span>
                 </div>
@@ -107,8 +95,9 @@ export default function ProjetosPage() {
                 {/* Membros */}
                 <div className="flex flex-wrap gap-2 mb-4">
                   {project.members.map((m) => (
-                    <span key={m.company.slug} className="text-xs bg-gray-50 text-gray-600 px-3 py-1 rounded-full">
-                      {m.company.nome} ({m.role})
+                    <span key={m.company.slug} className="text-xs bg-gray-50 text-gray-600 px-3 py-1.5 rounded-full ring-1 ring-gray-100">
+                      {m.company.nome}
+                      <span className="text-gray-400 ml-1">({m.role})</span>
                     </span>
                   ))}
                 </div>
@@ -116,14 +105,14 @@ export default function ProjetosPage() {
                 {/* Progresso de tarefas */}
                 {totalTasks > 0 && (
                   <div className="mb-4">
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-xs text-gray-500">Tarefas</span>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Tarefas</span>
                       <span className="text-xs font-medium text-gray-600">{doneTasks}/{totalTasks}</span>
                     </div>
                     <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-emerald-500 rounded-full transition-all"
-                        style={{ width: `${(doneTasks / totalTasks) * 100}%` }}
+                        className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-full transition-all duration-500"
+                        style={{ width: `${progress}%` }}
                       />
                     </div>
                   </div>
@@ -131,10 +120,10 @@ export default function ProjetosPage() {
 
                 {/* Tarefas recentes */}
                 {project.tasks.length > 0 && (
-                  <div className="space-y-2">
+                  <div className="space-y-1.5">
                     {project.tasks.slice(0, 5).map((task) => (
-                      <div key={task.id} className="flex items-center justify-between py-1.5">
-                        <div className="flex items-center gap-2">
+                      <div key={task.id} className="flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-gray-50 transition-colors">
+                        <div className="flex items-center gap-2.5">
                           <div className={`w-1.5 h-1.5 rounded-full ${
                             task.status === "concluida" ? "bg-emerald-500" :
                             task.status === "em-progresso" ? "bg-blue-500" : "bg-gray-300"
@@ -143,7 +132,7 @@ export default function ProjetosPage() {
                             {task.titulo}
                           </span>
                         </div>
-                        <span className={`text-[10px] font-medium px-2 py-0.5 rounded ${taskStatusColors[task.status] || taskStatusColors.pendente}`}>
+                        <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${taskStatusColors[task.status] || taskStatusColors.pendente}`}>
                           {task.status}
                         </span>
                       </div>

@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { Building2, Save, CheckCircle } from "lucide-react";
+import { PageHeader } from "@/components/ui/page-header";
+import { SkeletonPage } from "@/components/ui/skeleton";
 
 interface CompanyData {
   slug: string;
@@ -19,18 +21,18 @@ interface CompanyData {
 }
 
 const estagios = [
-  { value: "ideacao", label: "Ideação" },
-  { value: "validacao", label: "Validação" },
-  { value: "operando", label: "Em operação" },
+  { value: "ideacao", label: "Ideacao" },
+  { value: "validacao", label: "Validacao" },
+  { value: "operando", label: "Em operacao" },
   { value: "escala", label: "Escala" },
   { value: "consolidado", label: "Consolidado" },
 ];
 
 const faixas = [
-  { value: "ate-100k", label: "Até 100k EUR" },
-  { value: "100k-500k", label: "100k–500k EUR" },
-  { value: "500k-1m", label: "500k–1M EUR" },
-  { value: "1m-5m", label: "1M–5M EUR" },
+  { value: "ate-100k", label: "Ate 100k EUR" },
+  { value: "100k-500k", label: "100k-500k EUR" },
+  { value: "500k-1m", label: "500k-1M EUR" },
+  { value: "1m-5m", label: "1M-5M EUR" },
   { value: "5m+", label: "5M+ EUR" },
 ];
 
@@ -134,37 +136,24 @@ export default function EmpresaPage() {
     }
   }
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-2 border-amber-500/20 border-t-amber-500 rounded-full animate-spin" />
-      </div>
-    );
-  }
+  if (loading) return <SkeletonPage />;
 
   const inputClass =
-    "w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-300 transition-all";
+    "w-full px-4 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-300 transition-all placeholder:text-gray-300";
 
   return (
     <div className="max-w-2xl space-y-6">
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center">
-          <Building2 className="w-5 h-5 text-amber-600" />
-        </div>
-        <div>
-          <h1 className="text-xl font-bold text-gray-900">
-            {isNew ? "Criar empresa" : "Perfil da empresa"}
-          </h1>
-          <p className="text-sm text-gray-400">
-            {isNew ? "Registre sua empresa para acessar o ecossistema" : "Gerencie informações públicas"}
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        icon={Building2}
+        title={isNew ? "Criar empresa" : "Perfil da empresa"}
+        description={isNew ? "Registre sua empresa para acessar o ecossistema" : "Gerencie informacoes publicas"}
+      />
 
-      <div className="bg-white rounded-2xl border border-black/[0.04] p-6 space-y-5">
+      <div className="bg-white rounded-2xl border border-black/[0.04] p-6 space-y-5 shadow-sm">
+        {/* Nome e Slug */}
         <div className="grid md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Nome da empresa *</label>
+            <label className="block text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Nome da empresa *</label>
             <input
               className={inputClass}
               value={form.nome}
@@ -176,7 +165,7 @@ export default function EmpresaPage() {
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Slug (URL) *</label>
+            <label className="block text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Slug (URL) *</label>
             <input
               className={inputClass}
               value={form.slug}
@@ -187,8 +176,9 @@ export default function EmpresaPage() {
           </div>
         </div>
 
+        {/* Tagline */}
         <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1">Tagline</label>
+          <label className="block text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Tagline</label>
           <input
             className={inputClass}
             value={form.tagline}
@@ -197,8 +187,9 @@ export default function EmpresaPage() {
           />
         </div>
 
+        {/* Descricao */}
         <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1">Descrição</label>
+          <label className="block text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Descricao</label>
           <textarea
             className={`${inputClass} resize-none`}
             rows={3}
@@ -208,9 +199,15 @@ export default function EmpresaPage() {
           />
         </div>
 
+        {/* Divisor */}
+        <div className="border-t border-gray-100 pt-5">
+          <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-4">Informacoes do negocio</p>
+        </div>
+
+        {/* Setor, Pais, Cidade */}
         <div className="grid md:grid-cols-3 gap-4">
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Setor *</label>
+            <label className="block text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Setor *</label>
             <input
               className={inputClass}
               value={form.setor}
@@ -219,7 +216,7 @@ export default function EmpresaPage() {
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">País *</label>
+            <label className="block text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Pais *</label>
             <input
               className={inputClass}
               value={form.pais}
@@ -227,7 +224,7 @@ export default function EmpresaPage() {
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Cidade</label>
+            <label className="block text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Cidade</label>
             <input
               className={inputClass}
               value={form.cidade}
@@ -237,9 +234,10 @@ export default function EmpresaPage() {
           </div>
         </div>
 
+        {/* Website e LinkedIn */}
         <div className="grid md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Website</label>
+            <label className="block text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Website</label>
             <input
               className={inputClass}
               value={form.website}
@@ -248,7 +246,7 @@ export default function EmpresaPage() {
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">LinkedIn</label>
+            <label className="block text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">LinkedIn</label>
             <input
               className={inputClass}
               value={form.linkedin}
@@ -258,34 +256,36 @@ export default function EmpresaPage() {
           </div>
         </div>
 
+        {/* Estagio e Faturamento */}
         <div className="grid md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Estágio</label>
+            <label className="block text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Estagio</label>
             <select className={inputClass} value={form.estagio} onChange={(e) => set("estagio", e.target.value)}>
               {estagios.map((e) => <option key={e.value} value={e.value}>{e.label}</option>)}
             </select>
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Faturamento anual</label>
+            <label className="block text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Faturamento anual</label>
             <select className={inputClass} value={form.faturamento} onChange={(e) => set("faturamento", e.target.value)}>
-              <option value="">Prefiro não informar</option>
+              <option value="">Prefiro nao informar</option>
               {faixas.map((f) => <option key={f.value} value={f.value}>{f.label}</option>)}
             </select>
           </div>
         </div>
 
+        {/* Interesses */}
         <div>
-          <label className="block text-xs font-medium text-gray-500 mb-2">Interesses</label>
+          <label className="block text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2.5">Interesses</label>
           <div className="flex flex-wrap gap-2">
             {interesseOptions.map((tag) => (
               <button
                 key={tag}
                 type="button"
                 onClick={() => toggleInteresse(tag)}
-                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-all ${
                   form.interesses.includes(tag)
-                    ? "bg-amber-100 text-amber-700 border border-amber-200"
-                    : "bg-gray-50 text-gray-500 border border-gray-100 hover:bg-gray-100"
+                    ? "bg-amber-100 text-amber-700 ring-1 ring-amber-200 shadow-sm"
+                    : "bg-gray-50 text-gray-500 ring-1 ring-gray-100 hover:bg-gray-100 hover:ring-gray-200"
                 }`}
               >
                 {tag}
@@ -294,16 +294,26 @@ export default function EmpresaPage() {
           </div>
         </div>
 
-        {error && <p className="text-red-500 text-sm">{error}</p>}
+        {error && (
+          <div className="bg-red-50 border border-red-100 rounded-xl px-4 py-3">
+            <p className="text-red-600 text-sm">{error}</p>
+          </div>
+        )}
 
-        <button
-          onClick={handleSave}
-          disabled={saving || !form.nome || !form.setor || !form.pais}
-          className="inline-flex items-center gap-2 bg-amber-600 text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-amber-500 transition-all disabled:opacity-50"
-        >
-          {saved ? <CheckCircle className="w-4 h-4" /> : <Save className="w-4 h-4" />}
-          {saving ? "Salvando..." : saved ? "Salvo" : isNew ? "Criar empresa" : "Salvar alterações"}
-        </button>
+        <div className="pt-2">
+          <button
+            onClick={handleSave}
+            disabled={saving || !form.nome || !form.setor || !form.pais}
+            className={`inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-medium transition-all disabled:opacity-50 ${
+              saved
+                ? "bg-emerald-500 text-white"
+                : "bg-gradient-to-r from-amber-600 to-amber-500 text-white hover:shadow-lg hover:shadow-amber-500/20"
+            }`}
+          >
+            {saved ? <CheckCircle className="w-4 h-4" /> : <Save className="w-4 h-4" />}
+            {saving ? "Salvando..." : saved ? "Salvo" : isNew ? "Criar empresa" : "Salvar alteracoes"}
+          </button>
+        </div>
       </div>
     </div>
   );

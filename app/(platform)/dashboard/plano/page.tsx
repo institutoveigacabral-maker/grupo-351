@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CreditCard, Check, ArrowRight, Settings, Sparkles, Receipt, FileText } from "lucide-react";
+import { CreditCard, Check, ArrowRight, Settings, Sparkles, Receipt, FileText, Zap, Users, Bot, Code } from "lucide-react";
+import { PageHeader } from "@/components/ui/page-header";
+import { EmptyState } from "@/components/ui/empty-state";
+import { SkeletonPage } from "@/components/ui/skeleton";
 
 interface PlanData {
   id: string;
@@ -80,38 +83,29 @@ export default function PlanoPage() {
     }
   }
 
-  if (loading || !data) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-2 border-amber-500/20 border-t-amber-500 rounded-full animate-spin" />
-      </div>
-    );
-  }
+  if (loading || !data) return <SkeletonPage />;
 
   const currentPlanData = data.plans.find((p) => p.id === data.currentPlan);
+  const limitIcons = [
+    { icon: Zap, label: "Oportunidades", value: currentPlanData?.limites.oportunidades === -1 ? "Ilimitado" : String(currentPlanData?.limites.oportunidades || 0) },
+    { icon: Users, label: "Membros", value: currentPlanData?.limites.membros === -1 ? "Ilimitado" : String(currentPlanData?.limites.membros || 0) },
+    { icon: Bot, label: "Matches IA", value: currentPlanData?.limites.matchesIA ? "Ativo" : "Inativo" },
+    { icon: Code, label: "API", value: currentPlanData?.limites.apiAccess ? "Ativo" : "Inativo" },
+  ];
 
   return (
     <div className="max-w-4xl space-y-8">
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-violet-50 flex items-center justify-center">
-          <CreditCard className="w-5 h-5 text-violet-600" />
-        </div>
-        <div>
-          <h1 className="text-xl font-bold text-gray-900">Plano e faturamento</h1>
-          <p className="text-sm text-gray-400">
-            Plano atual: <span className="font-medium text-gray-600 capitalize">{data.currentPlan}</span>
-          </p>
-        </div>
-      </div>
+      <PageHeader icon={CreditCard} iconBg="bg-violet-50" iconColor="text-violet-600" title="Plano e faturamento" description={`Plano atual: ${data.currentPlan}`} />
 
       {/* Subscription info + limits */}
       {data.subscription && (
-        <div className="bg-white rounded-2xl border border-black/[0.04] p-5">
-          <div className="flex items-center justify-between mb-4">
+        <div className="bg-white rounded-2xl border border-black/[0.04] p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-5">
             <div>
-              <p className="text-sm text-gray-600">
-                Status: <span className="font-medium capitalize">{data.subscription.status}</span>
-              </p>
+              <div className="flex items-center gap-2">
+                <div className={`w-2 h-2 rounded-full ${data.subscription.status === "active" ? "bg-emerald-500" : "bg-amber-500"}`} />
+                <p className="text-sm font-medium text-gray-900 capitalize">{data.subscription.status}</p>
+              </div>
               {data.subscription.currentPeriodEnd && (
                 <p className="text-xs text-gray-400 mt-1">
                   {data.subscription.cancelAtPeriodEnd ? "Cancela em" : "Renova em"}{" "}
@@ -122,58 +116,45 @@ export default function PlanoPage() {
             <button
               onClick={handleManage}
               disabled={actionLoading === "manage"}
-              className="inline-flex items-center gap-2 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-200 transition-all disabled:opacity-50"
+              className="inline-flex items-center gap-2 bg-gray-50 text-gray-700 px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-100 transition-all disabled:opacity-50 ring-1 ring-gray-200/60"
             >
               <Settings className="w-4 h-4" />
               Gerir assinatura
             </button>
           </div>
           {currentPlanData && (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-3 border-t border-black/[0.04]">
-              <div className="text-center p-3 bg-gray-50 rounded-lg">
-                <p className="text-lg font-bold text-gray-900">
-                  {currentPlanData.limites.oportunidades === -1 ? "Ilim." : currentPlanData.limites.oportunidades}
-                </p>
-                <p className="text-[11px] text-gray-500">Oportunidades</p>
-              </div>
-              <div className="text-center p-3 bg-gray-50 rounded-lg">
-                <p className="text-lg font-bold text-gray-900">
-                  {currentPlanData.limites.membros === -1 ? "Ilim." : currentPlanData.limites.membros}
-                </p>
-                <p className="text-[11px] text-gray-500">Membros</p>
-              </div>
-              <div className="text-center p-3 bg-gray-50 rounded-lg">
-                <p className="text-lg font-bold text-gray-900">{currentPlanData.limites.matchesIA ? "Sim" : "Não"}</p>
-                <p className="text-[11px] text-gray-500">Matches IA</p>
-              </div>
-              <div className="text-center p-3 bg-gray-50 rounded-lg">
-                <p className="text-lg font-bold text-gray-900">{currentPlanData.limites.apiAccess ? "Sim" : "Não"}</p>
-                <p className="text-[11px] text-gray-500">API</p>
-              </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-4 border-t border-black/[0.04]">
+              {limitIcons.map(({ icon: LIcon, label, value }) => (
+                <div key={label} className="text-center p-3 bg-gray-50/80 rounded-xl">
+                  <LIcon className="w-4 h-4 text-gray-400 mx-auto mb-1.5" />
+                  <p className="text-lg font-bold text-gray-900">{value}</p>
+                  <p className="text-[10px] font-medium text-gray-400 uppercase tracking-wider">{label}</p>
+                </div>
+              ))}
             </div>
           )}
         </div>
       )}
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-gray-100 rounded-lg p-1 w-fit">
+      <div className="flex gap-1 bg-gray-100/80 rounded-xl p-1 w-fit">
         <button
           onClick={() => setTab("planos")}
-          className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${tab === "planos" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === "planos" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
         >
           Planos
         </button>
         <button
           onClick={() => setTab("faturas")}
-          className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${tab === "faturas" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5 ${tab === "faturas" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
         >
-          <Receipt className="w-3.5 h-3.5 inline mr-1" />
+          <Receipt className="w-3.5 h-3.5" />
           Faturas ({invoices.length})
         </button>
       </div>
 
       {tab === "planos" && (
-        <div className="grid md:grid-cols-3 gap-4">
+        <div className="grid md:grid-cols-3 gap-5">
           {data.plans.map((plan) => {
             const isCurrent = plan.id === data.currentPlan;
             const isPopular = plan.id === "growth";
@@ -181,52 +162,54 @@ export default function PlanoPage() {
             return (
               <div
                 key={plan.id}
-                className={`rounded-2xl border p-6 relative ${
+                className={`rounded-2xl border p-6 relative transition-all duration-300 hover:shadow-xl hover:shadow-black/[0.04] ${
                   isPopular
-                    ? "border-amber-300 bg-amber-50/30 shadow-lg shadow-amber-500/5"
+                    ? "border-amber-200 bg-gradient-to-b from-amber-50/50 to-white shadow-lg shadow-amber-500/[0.06]"
                     : "border-black/[0.04] bg-white"
                 }`}
               >
                 {isPopular && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <span className="bg-amber-600 text-white text-[10px] font-bold px-3 py-1 rounded-full flex items-center gap-1">
+                    <span className="bg-gradient-to-r from-amber-600 to-orange-500 text-white text-[10px] font-bold px-3.5 py-1 rounded-full flex items-center gap-1 shadow-lg shadow-amber-500/20">
                       <Sparkles className="w-3 h-3" /> Popular
                     </span>
                   </div>
                 )}
 
                 <h3 className="font-semibold text-gray-900 text-lg">{plan.nome}</h3>
-                <div className="mt-2 mb-4">
-                  <span className="text-3xl font-bold text-gray-900">
-                    {plan.preco === 0 ? "Grátis" : `${plan.preco / 100}€`}
+                <div className="mt-2 mb-5">
+                  <span className="text-3xl font-bold text-gray-900 tracking-tight">
+                    {plan.preco === 0 ? "Gratis" : `${plan.preco / 100}€`}
                   </span>
-                  {plan.preco > 0 && <span className="text-sm text-gray-400">/mês</span>}
+                  {plan.preco > 0 && <span className="text-sm text-gray-400 ml-1">/mes</span>}
                 </div>
 
-                <ul className="space-y-2 mb-6">
+                <ul className="space-y-2.5 mb-6">
                   {plan.features.map((f) => (
-                    <li key={f} className="flex items-start gap-2 text-sm text-gray-600">
-                      <Check className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                    <li key={f} className="flex items-start gap-2.5 text-sm text-gray-600">
+                      <div className="w-4 h-4 rounded-full bg-emerald-50 flex items-center justify-center shrink-0 mt-0.5">
+                        <Check className="w-2.5 h-2.5 text-emerald-600" />
+                      </div>
                       {f}
                     </li>
                   ))}
                 </ul>
 
                 {isCurrent ? (
-                  <div className="w-full text-center py-2.5 rounded-lg bg-gray-100 text-gray-500 text-sm font-medium">
+                  <div className="w-full text-center py-2.5 rounded-xl bg-gray-50 text-gray-400 text-sm font-medium ring-1 ring-gray-100">
                     Plano atual
                   </div>
                 ) : plan.preco === 0 ? (
-                  <div className="w-full text-center py-2.5 rounded-lg bg-gray-50 text-gray-400 text-sm">
-                    Incluído
+                  <div className="w-full text-center py-2.5 rounded-xl bg-gray-50 text-gray-300 text-sm">
+                    Incluido
                   </div>
                 ) : (
                   <button
                     onClick={() => handleCheckout(plan.id)}
                     disabled={actionLoading === plan.id}
-                    className={`w-full py-2.5 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-all disabled:opacity-50 ${
+                    className={`w-full py-2.5 rounded-xl text-sm font-medium flex items-center justify-center gap-2 transition-all disabled:opacity-50 ${
                       isPopular
-                        ? "bg-amber-600 text-white hover:bg-amber-500"
+                        ? "bg-gradient-to-r from-amber-600 to-amber-500 text-white hover:shadow-lg hover:shadow-amber-500/20"
                         : "bg-gray-900 text-white hover:bg-gray-800"
                     }`}
                   >
@@ -241,47 +224,46 @@ export default function PlanoPage() {
       )}
 
       {tab === "faturas" && (
-        <div className="bg-white rounded-2xl border border-black/[0.04] overflow-hidden">
+        <div className="bg-white rounded-2xl border border-black/[0.04] overflow-hidden shadow-sm">
           {invoices.length === 0 ? (
-            <div className="p-12 text-center">
-              <FileText className="w-8 h-8 text-gray-200 mx-auto mb-3" />
-              <p className="text-gray-400 text-sm">Nenhuma fatura encontrada.</p>
-            </div>
+            <EmptyState icon={FileText} title="Nenhuma fatura encontrada" description="Suas faturas aparecerão aqui após a primeira cobrança." />
           ) : (
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-black/[0.04] bg-gray-50/50">
-                  <th className="text-left px-5 py-3 text-xs font-medium text-gray-500">Data</th>
-                  <th className="text-left px-5 py-3 text-xs font-medium text-gray-500">Descrição</th>
-                  <th className="text-left px-5 py-3 text-xs font-medium text-gray-500">Valor</th>
-                  <th className="text-left px-5 py-3 text-xs font-medium text-gray-500">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-black/[0.04]">
-                {invoices.map((inv) => (
-                  <tr key={inv.id}>
-                    <td className="px-5 py-3 text-gray-600">
-                      {new Date(inv.criadoEm).toLocaleDateString("pt-PT")}
-                    </td>
-                    <td className="px-5 py-3 text-gray-900 font-medium">
-                      {inv.descricao || inv.tipo}
-                    </td>
-                    <td className="px-5 py-3 text-gray-900 font-medium">
-                      {(inv.amount / 100).toFixed(2)} {inv.currency.toUpperCase()}
-                    </td>
-                    <td className="px-5 py-3">
-                      <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${
-                        inv.status === "succeeded" ? "bg-emerald-50 text-emerald-700" :
-                        inv.status === "pending" ? "bg-amber-50 text-amber-700" :
-                        "bg-red-50 text-red-700"
-                      }`}>
-                        {inv.status === "succeeded" ? "Pago" : inv.status === "pending" ? "Pendente" : "Falhou"}
-                      </span>
-                    </td>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-black/[0.04] bg-gray-50/50">
+                    <th className="text-left px-5 py-3 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Data</th>
+                    <th className="text-left px-5 py-3 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Descricao</th>
+                    <th className="text-left px-5 py-3 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Valor</th>
+                    <th className="text-left px-5 py-3 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Status</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-black/[0.03]">
+                  {invoices.map((inv) => (
+                    <tr key={inv.id} className="hover:bg-gray-50/50 transition-colors">
+                      <td className="px-5 py-3.5 text-gray-500">
+                        {new Date(inv.criadoEm).toLocaleDateString("pt-PT")}
+                      </td>
+                      <td className="px-5 py-3.5 text-gray-900 font-medium">
+                        {inv.descricao || inv.tipo}
+                      </td>
+                      <td className="px-5 py-3.5 text-gray-900 font-semibold tabular-nums">
+                        {(inv.amount / 100).toFixed(2)} {inv.currency.toUpperCase()}
+                      </td>
+                      <td className="px-5 py-3.5">
+                        <span className={`text-[11px] font-medium px-2.5 py-1 rounded-full ${
+                          inv.status === "succeeded" ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/10" :
+                          inv.status === "pending" ? "bg-amber-50 text-amber-700 ring-1 ring-amber-600/10" :
+                          "bg-red-50 text-red-700 ring-1 ring-red-600/10"
+                        }`}>
+                          {inv.status === "succeeded" ? "Pago" : inv.status === "pending" ? "Pendente" : "Falhou"}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
       )}
