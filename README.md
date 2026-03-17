@@ -205,10 +205,30 @@ Acesse [http://localhost:3000](http://localhost:3000).
 |------|-----------|
 | `POST /api/webhooks/stripe` | Webhook do Stripe |
 
+## Scripts
+
+| Comando | Descricao |
+|---------|-----------|
+| `pnpm dev` | Inicia o servidor de desenvolvimento |
+| `pnpm build` | Gera o Prisma Client e faz o build de producao |
+| `pnpm start` | Inicia o servidor de producao |
+| `pnpm lint` | Executa o ESLint |
+| `pnpm test` | Executa todos os testes (Vitest) |
+| `pnpm test:watch` | Executa testes em modo watch |
+| `pnpm typecheck` | Verificacao de tipos TypeScript |
+| `pnpm format` | Formata o codigo com Prettier |
+| `pnpm format:check` | Verifica formatacao sem alterar |
+| `pnpm db:generate` | Gera o Prisma Client |
+| `pnpm db:push` | Sincroniza o schema com o banco |
+| `pnpm db:studio` | Abre o Prisma Studio (GUI do banco) |
+| `pnpm db:migrate` | Executa migracoes JSON para banco |
+| `pnpm analyze` | Build com analise de bundle |
+| `pnpm audit:deps` | Auditoria de dependencias |
+
 ## Testes
 
 ```bash
-pnpm vitest
+pnpm test
 ```
 
 308 testes em 30 suites cobrindo: autenticacao, API v1, billing, cache, CRM, e-mail, i18n, matching, middleware, notificacoes, RBAC, rate limiting, scoring, validacoes, logger, security headers e mais.
