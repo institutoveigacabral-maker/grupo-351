@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import { NextResponse } from "next/server";
 import { getReuniaoDataset } from "@/lib/db";
 
@@ -8,7 +9,7 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const token = searchParams.get("token");
 
-  if (token !== SHARE_TOKEN) {
+  if (!token || !SHARE_TOKEN || !crypto.timingSafeEqual(crypto.createHash('sha256').update(token).digest(), crypto.createHash('sha256').update(SHARE_TOKEN).digest())) {
     return NextResponse.json({ error: "Token invalido" }, { status: 401 });
   }
 
