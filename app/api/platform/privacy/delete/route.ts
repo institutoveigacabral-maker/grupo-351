@@ -44,7 +44,7 @@ export async function POST(request: Request) {
       const company = await tx.company.findUnique({ where: { ownerId: session.id } });
       if (company) {
         await tx.document.deleteMany({ where: { empresaId: company.id } });
-        await tx.teamInvite.deleteMany({ where: { empresaId: company.id } });
+        await tx.teamInvite.deleteMany({ where: { empresaId: { equals: company.id } } });
         await tx.companyMember.deleteMany({ where: { companyId: company.id } });
         await tx.opportunity.deleteMany({ where: { companyId: company.id } });
         await tx.company.delete({ where: { id: company.id } });

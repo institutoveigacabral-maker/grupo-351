@@ -60,7 +60,7 @@ export async function PATCH(request: Request) {
 
   if (body.id) {
     await prisma.userNotification.updateMany({
-      where: { id: body.id, userId: session.id },
+      where: { id: { equals: body.id }, userId: session.id },
       data: { lida: true },
     });
     await invalidate(`user:${session.id}:notifications`);
