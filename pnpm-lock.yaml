@@ -94,8 +94,8 @@ importers:
         version: 4.3.6
     devDependencies:
       '@next/bundle-analyzer':
-        specifier: ^16.1.6
-        version: 16.1.6
+        specifier: ^16.2.12
+        version: 16.2.12
       '@tailwindcss/postcss':
         specifier: ^4
         version: 4.2.1
@@ -646,8 +646,8 @@ packages:
     resolution: {integrity: sha512-I5sbpSIAHiB+b6UttofhrN/UJXII+4tZPAq1qugzwCwLIL8EZLV7F/JyHUrEIiGgQpEXzpnjlJ+zwcEhheGvCw==}
     engines: {node: '>=19.0.0'}
 
-  '@next/bundle-analyzer@16.1.6':
-    resolution: {integrity: sha512-ee2kagdTaeEWPlotgdTOqFHYcD3e2m2bbE3I9Rq2i6ABYi5OgopmtEUe8NM23viaYxLV2tDH/2nd5+qKoEr6cw==}
+  '@next/bundle-analyzer@16.2.12':
+    resolution: {integrity: sha512-0dYhmCYsTMFYUFaoEUx+VKw/oYP6b3XiGgq47EujXTE2UGgwVWAaur2tbko2pxfUka3WRZ9YWxa3PlSv3luWNQ==}
 
   '@next/env@16.2.11':
     resolution: {integrity: sha512-0do5A3BJ2gxWr0ZCMcD6BhW+e595jyxdTl3rXTS6lOtD8ektMiW6CO+EPwt1Eca1DBnm90r/7GdiKWBKxH++DA==}
@@ -4974,8 +4974,8 @@ packages:
     resolution: {integrity: sha512-42AtmgqjV+X1VpdOfyTGOYRi0/zsoLqtXQckTmqTeybT+BDIbM/Guxo7x3pE2vtpr1ok6xRqM9OpBe+Jyoqyww==}
     engines: {node: '>=18'}
 
-  ws@7.5.11:
-    resolution: {integrity: sha512-zS54Oen9bITtp7kp2XM3AydrCIq1D+HwJOuH+c+e4LfpL/lotP5osijd+UoMnxwAam1GN8R4KtLAyIrIcBNpiA==}
+  ws@7.5.13:
+    resolution: {integrity: sha512-rsKI6xDBFVf4r/x8XyChGK04QR/XHroxs/jUcoWvtEZM8TPU/X/uIY9B1CsSzYws9ZJb/6bbBu7dPhFW00CAoA==}
     engines: {node: '>=8.3.0'}
     peerDependencies:
       bufferutil: ^4.0.1
@@ -5505,7 +5505,7 @@ snapshots:
       '@types/node': 22.19.15
       '@types/pg': 8.18.0
 
-  '@next/bundle-analyzer@16.1.6':
+  '@next/bundle-analyzer@16.2.12':
     dependencies:
       webpack-bundle-analyzer: 4.10.1
     transitivePeerDependencies:
@@ -7100,9 +7100,9 @@ snapshots:
 
   '@xtuc/long@4.2.2': {}
 
-  acorn-import-attributes@1.9.5(acorn@8.16.0):
+  acorn-import-attributes@1.9.5(acorn@8.18.0):
     dependencies:
-      acorn: 8.16.0
+      acorn: 8.18.0
 
   acorn-import-phases@1.0.4(acorn@8.18.0):
     dependencies:
@@ -7114,7 +7114,7 @@ snapshots:
 
   acorn-walk@8.3.5:
     dependencies:
-      acorn: 8.16.0
+      acorn: 8.18.0
 
   acorn@8.16.0: {}
 
@@ -8178,8 +8178,8 @@ snapshots:
 
   import-in-the-middle@2.0.6:
     dependencies:
-      acorn: 8.16.0
-      acorn-import-attributes: 1.9.5(acorn@8.16.0)
+      acorn: 8.18.0
+      acorn-import-attributes: 1.9.5(acorn@8.18.0)
       cjs-module-lexer: 2.2.0
       module-details-from-path: 1.0.4
 
@@ -9797,7 +9797,7 @@ snapshots:
   webpack-bundle-analyzer@4.10.1:
     dependencies:
       '@discoveryjs/json-ext': 0.5.7
-      acorn: 8.16.0
+      acorn: 8.18.0
       acorn-walk: 8.3.5
       commander: 7.2.0
       debounce: 1.2.1
@@ -9808,7 +9808,7 @@ snapshots:
       opener: 1.5.2
       picocolors: 1.1.1
       sirv: 2.0.4
-      ws: 7.5.11
+      ws: 7.5.13
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
@@ -9929,7 +9929,7 @@ snapshots:
       string-width: 7.2.0
       strip-ansi: 7.2.0
 
-  ws@7.5.11: {}
+  ws@7.5.13: {}
 
   ws@8.20.1: {}
 
